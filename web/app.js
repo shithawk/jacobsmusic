@@ -17,7 +17,8 @@ const state = {
   shuffleRewind: false,
   openArtists: new Set(),
   openSearchArtists: new Set(),
-  artistQueue: null
+  artistQueue: null,
+  catalogSessionDownloads: new Set()
 };
 
 let dbPromise = null;
@@ -151,7 +152,7 @@ let youtubeSearchToken = 0;
 let linkConfirmId = "";
 const downloading = new Set();
 
-const SW_BUILD = "14";
+const SW_BUILD = "15";
 
 function registerServiceWorker() {
   if (!("serviceWorker" in navigator)) return;
@@ -1407,6 +1408,7 @@ function setAddError(text) {
 async function openAdd() {
   setAddError("");
   hideConfirm();
+  state.catalogSessionDownloads.clear();
   showSheet("add-sheet");
   scrollSheetBodyToTop("add-sheet");
   await loadCatalog();
@@ -1426,6 +1428,16 @@ async function loadCatalog() {
   }
 }
 
+function catalogEntriesForDisplay(onlyPending) {
+  const pending = state.catalog.filter((entry) => !savedOnIpad(entry));
+  if (onlyPending) return pending;
+  const session = state.catalogSessionDownloads;
+  return state.catalog.filter((entry) => {
+    if (!savedOnIpad(entry)) return true;
+    return session.has(entry.file);
+  });
+}
+
 function renderCatalog(options) {
   const resetScroll = Boolean(options && options.resetScroll);
   const onlyPending = Boolean(options && options.onlyPending);
@@ -1435,19 +1447,19 @@ function renderCatalog(options) {
   const scrollTop = scroller ? scroller.scrollTop : 0;
   list.replaceChildren();
   const pending = state.catalog.filter((entry) => !savedOnIpad(entry));
-  const entries = onlyPending ? pending : state.catalog;
+  const entries = catalogEntriesForDisplay(onlyPending);
   if (state.macError) {
     status.textContent = state.macError;
   } else if (state.catalog.length === 0) {
     status.textContent = "No songs on the computer yet.";
   } else if (onlyPending && pending.length === 0) {
     status.textContent = "Every song on the computer is already " + onThisDevice() + ".";
-  } else if (!onlyPending && pending.length === 0) {
-    status.textContent = "Songs " + onThisDevice() + " are ready. Tap Play.";
+  } else if (!onlyPending && pending.length === 0 && entries.length > 0) {
+    status.textContent = "Tap Play on the songs you just downloaded.";
   } else {
     status.textContent = onlyPending
       ? "Tap Download to put a song " + onThisDevice() + "."
-      : "New songs: Download. Songs already " + onThisDevice() + ": Play.";
+      : "Download more, or tap Play on songs you just added.";
   }
   for (const entry of entries) {
     const already = savedOnIpad(entry);
@@ -1567,6 +1579,7 @@ async function downloadEntry(entry, announce) {
     await saveLocal(track, blob, tags.artwork);
     state.readyId = track.id;
     state.tracks = sortTracks(state.tracks.filter((item) => item.id !== track.id).concat(track));
+    state.catalogSessionDownloads.add(entry.file);
     saved = true;
     savedTitle = track.title;
   } catch {
