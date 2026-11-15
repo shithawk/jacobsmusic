@@ -6,7 +6,7 @@
   --accent: #e87830;
   --accent-alt: #3d8fd4;
   --text: #f0eef8;
-  --transport-bar: calc(114px + env(safe-area-inset-bottom));
+  --transport-bar: calc(96px + env(safe-area-inset-bottom));
   --top-nav-offset: calc(88px + env(safe-area-inset-top));
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
@@ -28,7 +28,7 @@ body {
 }
 
 body.has-now {
-  --now-bar-space: 178px;
+  --now-bar-space: 136px;
   --transport-space: calc(var(--transport-bar) + var(--now-bar-space));
 }
 
@@ -59,7 +59,7 @@ h1, h2, p { margin: 0; }
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: calc(12px + env(safe-area-inset-top)) 16px 12px;
+  padding: calc(8px + env(safe-area-inset-top)) 16px 8px;
   background: var(--bg);
   transform: translateZ(0);
 }
@@ -73,7 +73,7 @@ h1, h2, p { margin: 0; }
 
 .top-nav-row > .home:not(.search-clear) {
   flex: 0 1 auto;
-  padding: 10px 12px;
+  padding: 6px 12px;
   font-size: 1.22rem;
 }
 
@@ -511,10 +511,10 @@ input::placeholder { color: rgba(255, 255, 255, 0.72); }
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   width: 100%;
-  margin-top: 12px;
-  padding: 16px 16px 16px 30px;
+  margin-top: 8px;
+  padding: 10px 12px 10px 24px;
   border-radius: 16px;
   background: var(--card);
   color: #fff;
@@ -529,7 +529,7 @@ input::placeholder { color: rgba(255, 255, 255, 0.72); }
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 6px;
+  gap: 2px;
 }
 
 .song-favorite {
@@ -537,8 +537,8 @@ input::placeholder { color: rgba(255, 255, 255, 0.72); }
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 56px;
-  height: 56px;
+  width: 46px;
+  height: 46px;
   margin: 0;
   padding: 0;
   border: 0;
@@ -578,9 +578,9 @@ input::placeholder { color: rgba(255, 255, 255, 0.72); }
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 72px;
-  height: 72px;
-  border-radius: 18px;
+  width: 54px;
+  height: 54px;
+  border-radius: 14px;
   background: var(--accent);
   color: #000;
 }
@@ -661,8 +661,8 @@ input::placeholder { color: rgba(255, 255, 255, 0.72); }
 .artist-songs { margin: 4px 0 8px 12px; }
 .artist-songs .song { margin-top: 8px; }
 
-.song-title { font-size: 1.7rem; font-weight: 700; }
-.song-sub { font-size: 1.25rem; }
+.song-title { font-size: 1.45rem; font-weight: 700; line-height: 1.2; }
+.song-sub { font-size: 1.05rem; line-height: 1.2; }
 .song.current .song-sub { color: rgba(0, 0, 0, 0.8); }
 
 .now-stack {
@@ -676,8 +676,8 @@ input::placeholder { color: rgba(255, 255, 255, 0.72); }
 .now-dock {
   display: flex;
   flex-direction: column;
-  gap: 3px;
-  padding: 0 0 8px;
+  gap: 2px;
+  padding: 0 0 4px;
   border-radius: 20px;
   overflow: hidden;
   background:
@@ -702,8 +702,8 @@ input::placeholder { color: rgba(255, 255, 255, 0.72); }
 .now-bar-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 1px 10px 6px 8px;
+  gap: 6px;
+  padding: 0 8px 3px 6px;
   margin-top: -1px;
 }
 
@@ -729,8 +729,8 @@ input::placeholder { color: rgba(255, 255, 255, 0.72); }
 
 .now-art {
   flex: none;
-  width: 56px;
-  height: 56px;
+  width: 48px;
+  height: 48px;
   border-radius: 12px;
   object-fit: cover;
   background: rgba(144, 176, 208, 0.12);
@@ -805,13 +805,14 @@ input::placeholder { color: rgba(255, 255, 255, 0.72); }
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: 1.2rem;
+  font-size: 1.05rem;
   font-weight: 700;
-  line-height: 1.25;
+  line-height: 1.2;
 }
 
 .now-dock .seek {
-  margin: 0 10px;
+  margin: 0 8px;
+  border-radius: 12px;
 }
 
 .seek {
@@ -825,7 +826,7 @@ input::placeholder { color: rgba(255, 255, 255, 0.72); }
   cursor: pointer;
 }
 
-.dock-seek { height: 76px; }
+.dock-seek { height: 42px; }
 
 .seek-fill {
   position: absolute;
@@ -841,9 +842,9 @@ input::placeholder { color: rgba(255, 255, 255, 0.72); }
   position: absolute;
   top: 50%;
   left: 0;
-  width: 40px;
-  height: 40px;
-  margin-left: -20px;
+  width: 32px;
+  height: 32px;
+  margin-left: -16px;
   border: 3px solid var(--accent-alt);
   border-radius: 50%;
   background: var(--text);
@@ -858,13 +859,13 @@ input::placeholder { color: rgba(255, 255, 255, 0.72); }
   z-index: 1;
   transform: translateY(-50%);
   color: var(--text);
-  font-size: 1.3rem;
+  font-size: 1.05rem;
   font-weight: 700;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
   pointer-events: none;
 }
 
-.seek-time.start { left: 58px; }
+.seek-time.start { left: 48px; }
 .seek-time.end { right: 14px; }
 
 #player {
@@ -956,8 +957,8 @@ input::placeholder { color: rgba(255, 255, 255, 0.72); }
 }
 
 .transport .big {
-  min-height: 96px;
-  padding: 8px 4px;
+  min-height: 78px;
+  padding: 5px 4px;
   font-size: 1.15rem;
   line-height: 1.1;
 }
@@ -1160,8 +1161,8 @@ body.has-now .sheet-screen { bottom: calc(var(--transport-bar) + var(--now-bar-s
 
 /* iPhone — compact tap targets (~44px min), tighter rhythm, more list on screen */
 html.iphone {
-  --transport-bar: calc(72px + env(safe-area-inset-bottom));
-  --top-nav-offset: calc(118px + env(safe-area-inset-top));
+  --transport-bar: calc(62px + env(safe-area-inset-bottom));
+  --top-nav-offset: calc(110px + env(safe-area-inset-top));
   --nav-clearance: calc(var(--top-nav-offset) + 12px);
 }
 
@@ -1171,12 +1172,12 @@ html.iphone body:not(.search-page):not(.songs-page) #songs {
 }
 
 html.iphone body.has-now {
-  --now-bar-space: 132px;
+  --now-bar-space: 96px;
 }
 
 html.iphone .top-nav {
-  gap: 6px;
-  padding: calc(6px + env(safe-area-inset-top)) 10px 6px;
+  gap: 4px;
+  padding: calc(4px + env(safe-area-inset-top)) 10px 4px;
 }
 
 html.iphone .top-nav-row {
@@ -1193,8 +1194,8 @@ html.iphone .top-nav-row > .home:not(.search-clear) {
   justify-content: center;
   width: 100%;
   min-width: 0;
-  min-height: 40px;
-  padding: 6px 4px;
+  min-height: 36px;
+  padding: 2px 4px;
   border-radius: 12px;
   font-size: 0.78rem;
   line-height: 1.1;
@@ -1314,42 +1315,42 @@ html.iphone .finder-hint {
 }
 
 html.iphone .song {
-  gap: 8px;
-  margin-top: 8px;
-  padding: 10px 10px 10px 22px;
+  gap: 6px;
+  margin-top: 6px;
+  padding: 7px 8px 7px 18px;
   border-radius: 12px;
   box-shadow: inset 0 0 0 2px rgba(90, 176, 196, 0.35);
 }
 
 html.iphone .song-title {
-  font-size: 1.1rem;
-  line-height: 1.2;
+  font-size: 1rem;
+  line-height: 1.15;
 }
 
 html.iphone .song-sub {
-  font-size: 0.88rem;
+  font-size: 0.8rem;
 }
 
 html.iphone .song-favorite {
-  width: 44px;
-  height: 44px;
+  width: 38px;
+  height: 38px;
   border-radius: 12px;
 }
 
 html.iphone .song-favorite svg {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
 }
 
 html.iphone .song-play {
-  width: 48px;
-  height: 48px;
+  width: 42px;
+  height: 42px;
   border-radius: 12px;
 }
 
 html.iphone .song-play svg {
-  width: 26px;
-  height: 26px;
+  width: 22px;
+  height: 22px;
 }
 
 html.iphone .transport {
@@ -1358,8 +1359,8 @@ html.iphone .transport {
 }
 
 html.iphone .transport .big {
-  min-height: 52px;
-  padding: 4px 2px;
+  min-height: 44px;
+  padding: 2px 2px;
   border-radius: 12px;
   font-size: 0.72rem;
   gap: 2px;
@@ -1378,8 +1379,8 @@ html.iphone .now-stack {
 }
 
 html.iphone .now-dock {
-  gap: 2px;
-  padding: 0 0 6px;
+  gap: 1px;
+  padding: 0 0 3px;
   border-radius: 14px;
 }
 
@@ -1389,15 +1390,15 @@ html.iphone .now-bar-row {
 }
 
 html.iphone .now-favorite {
-  width: 38px;
-  height: 38px;
+  width: 34px;
+  height: 34px;
   border-radius: 10px;
   margin-top: 0;
 }
 
 html.iphone .now-art {
-  width: 52px;
-  height: 52px;
+  width: 44px;
+  height: 44px;
   border-radius: 11px;
 }
 
@@ -1414,21 +1415,21 @@ html.iphone #now-bar-title {
 }
 
 html.iphone .dock-seek {
-  height: 56px;
+  height: 34px;
 }
 
 html.iphone .seek-time {
-  font-size: 1rem;
+  font-size: 0.82rem;
 }
 
 html.iphone .seek-time.start {
-  left: 48px;
+  left: 40px;
 }
 
 html.iphone .seek-thumb {
-  width: 32px;
-  height: 32px;
-  margin-left: -16px;
+  width: 26px;
+  height: 26px;
+  margin-left: -13px;
   border-width: 3px;
 }
 
