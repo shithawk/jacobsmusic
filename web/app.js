@@ -92,6 +92,19 @@ function onThisDevice() {
   return "on this " + deviceLabel();
 }
 
+function isPrivateLanHost() {
+  const h = location.hostname;
+  if (h === "localhost" || h === "127.0.0.1" || h === "[::1]") return false;
+  if (/^192\.168\.\d{1,3}\.\d{1,3}$/.test(h)) return true;
+  if (/^10\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(h)) return true;
+  if (/^172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}$/.test(h)) return true;
+  return false;
+}
+
+function guestWiFiVisit() {
+  return isPrivateLanHost() || location.search.indexOf("guest=1") !== -1;
+}
+
 function applyDeviceCopy() {
   const on = onThisDevice();
   const set = (id, text) => {
@@ -120,7 +133,14 @@ function applyDeviceCopy() {
   set("videos-empty", "No videos " + on + " yet.");
   const hintSub = document.querySelector("#install-hint .hint-sub");
   if (hintSub) {
-    if (androidInstallHints()) {
+    if (guestWiFiVisit()) {
+      hintSub.hidden = false;
+      hintSub.textContent = androidInstallHints()
+        ? "Same Wi‑Fi as the Mac. If Chrome warns about the certificate, tap Advanced → Proceed. Then ⋮ → Install app. Use + Add music on Wi‑Fi to download songs."
+        : deviceKind() === "iphone"
+          ? "Same Wi‑Fi as the Mac. In Safari, trust the certificate if asked, then Share → Add to Home Screen. Use + Add music on Wi‑Fi to download songs."
+          : "Same Wi‑Fi as the Mac. Install from the browser, then use + Add music on Wi‑Fi to download songs.";
+    } else if (androidInstallHints()) {
       hintSub.hidden = false;
       hintSub.textContent =
         "On Android, open this link in Chrome while Tailscale is on, then use ⋮ → Install app or Install and create shortcut.";
@@ -152,7 +172,7 @@ let youtubeSearchToken = 0;
 let linkConfirmId = "";
 const downloading = new Set();
 
-const SW_BUILD = "15";
+const SW_BUILD = "16";
 
 function registerServiceWorker() {
   if (!("serviceWorker" in navigator)) return;
