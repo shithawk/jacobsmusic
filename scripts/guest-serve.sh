@@ -6,6 +6,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PORT="${GUEST_PORT:-8445}"
 QR="$ROOT/images/jacobsmusic-guest-qr.png"
+RUNTIME="$ROOT/caddy-data/Caddyfile.guest.runtime"
 
 lan_ip() {
   local iface ip
@@ -39,20 +40,42 @@ img.save(dest)
 print(f"QR saved: {dest}")
 PY
 
+mkdir -p "$ROOT/caddy-data"
+cat >"$RUNTIME" <<EOF
+{
+	admin off
+}
+
+import $ROOT/caddy-routes.caddy
+
+http://127.0.0.1:8092 {
+	bind 127.0.0.1
+	import jacob_routes
+}
+
+https://${IP}:${PORT} {
+	bind 0.0.0.0
+	tls internal
+	import jacob_routes
+}
+EOF
+
 echo ""
 echo "Guest install (same Wi-Fi, Android/iPhone)"
 echo "  URL:  $URL"
 echo "  QR:   $QR"
+echo "  Caddy config: $RUNTIME"
 echo ""
 echo "On the phone:"
 echo "  1. Connect to the same Wi-Fi as this Mac."
 echo "  2. Scan the QR (or type the URL in Chrome)."
-echo "  3. If Chrome warns about the certificate: Advanced → Proceed."
+echo "  3. If Chrome says the connection is not private: Advanced → Proceed."
+echo "     (This Mac uses a local certificate — normal for guest Wi-Fi.)"
 echo "  4. Install the app (Chrome ⋮ → Install app)."
 echo "  5. + Add music → download on Wi-Fi (large; can take a while)."
 echo ""
 if lsof -iTCP:"$PORT" -sTCP:LISTEN >/dev/null 2>&1; then
-  echo "Port $PORT is already in use. Stop the other Caddy first." >&2
+  echo "Port $PORT is already in use. Stop the other Caddy first, then rerun this script." >&2
   exit 1
 fi
 if ! lsof -iTCP:8092 -sTCP:LISTEN >/dev/null 2>&1; then
@@ -63,4 +86,4 @@ echo "For daily use without LAN exposure, use: caddy run --config Caddyfile"
 echo ""
 
 cd "$ROOT"
-exec caddy run --config Caddyfile.guest
+exec caddy run --config "$RUNTIME"

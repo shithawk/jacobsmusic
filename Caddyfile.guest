@@ -1,19 +1,4 @@
-{
-	admin off
-	auto_https off
-}
-
-# Tailscale (127.0.0.1:8092) + guest Wi-Fi HTTPS (0.0.0.0:8445, Caddy internal CA).
-# Run: ./scripts/guest-serve.sh
-import caddy-routes.caddy
-
-:8092 {
-	bind 127.0.0.1
-	import jacob_routes
-}
-
-:8445 {
-	bind 0.0.0.0
-	tls internal
-	import jacob_routes
-}
+# Do not run this file directly. Use:
+#   ./scripts/guest-serve.sh
+# That script writes caddy-data/Caddyfile.guest.runtime with your LAN IP
+# (Caddy must issue TLS for https://<ip>:8445 — a bare :8445 block breaks TLS).

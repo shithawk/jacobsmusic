@@ -26,7 +26,8 @@ When someone is on your Wi‑Fi and should install once and download the library
 ./scripts/guest-serve.sh
 ```
 
-- Serves **HTTPS on LAN port `8445`** (`tls internal` — one certificate warning in Chrome).
+- Writes **`caddy-data/Caddyfile.guest.runtime`** with your current LAN IP (`https://<ip>:8445` — required for TLS to work).
+- Serves **HTTPS on LAN port `8445`** (`tls internal` — tap **Advanced → Proceed** on Android if Chrome says “not private”).
 - Keeps **`:8092` on localhost** for Tailscale `:8444`.
 - Writes **`images/jacobsmusic-guest-qr.png`** and prints the URL (`https://<lan-ip>:8445/?guest=1`).
 
