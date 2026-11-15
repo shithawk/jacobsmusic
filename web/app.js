@@ -151,7 +151,7 @@ let youtubeSearchToken = 0;
 let linkConfirmId = "";
 const downloading = new Set();
 
-const SW_BUILD = "9";
+const SW_BUILD = "13";
 
 function registerServiceWorker() {
   if (!("serviceWorker" in navigator)) return;

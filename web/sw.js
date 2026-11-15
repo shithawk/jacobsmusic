@@ -1,17 +1,18 @@
-const CACHE = "jacob-shell-v13";
+const CACHE = "jacob-shell-v14";
 const SHELL = [
   "/",
   "/index.html",
   "/styles.css",
   "/styles.css?v=7",
   "/app.js",
-  "/app.js?v=10",
+  "/app.js?v=11",
   "/manifest.webmanifest",
   "/favicon.ico?v=play1",
   "/youtube-logo.png",
   "/images.jpg",
-  "/icon-180.png?v=j2",
-  "/icon-512.png"
+  "/icon-180.png?v=j3",
+  "/icon-512.png?v=j3",
+  "/icon-512-maskable.png?v=j3",
 ];
 
 self.addEventListener("install", (event) => {
