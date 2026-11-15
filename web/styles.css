@@ -942,6 +942,8 @@ input::placeholder { color: rgba(255, 255, 255, 0.72); }
 
 .mirror { font-size: 1.25rem; }
 
+html.iphone #mirror-hint { display: none !important; }
+
 .transport {
   position: fixed;
   left: 0;
