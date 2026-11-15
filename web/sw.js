@@ -1,4 +1,4 @@
-const CACHE = "jacob-shell-v1";
+const CACHE = "jacob-shell-v2";
 const SHELL = [
   "/",
   "/index.html",
@@ -10,7 +10,7 @@ const SHELL = [
   "/favicon.ico?v=play1",
   "/youtube-logo.png",
   "/images.jpg",
-  "/icon-180.png?v=j1",
+  "/icon-180.png?v=j2",
   "/icon-512.png"
 ];
 
