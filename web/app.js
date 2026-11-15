@@ -151,7 +151,7 @@ let youtubeSearchToken = 0;
 let linkConfirmId = "";
 const downloading = new Set();
 
-const SW_BUILD = "13";
+const SW_BUILD = "14";
 
 function registerServiceWorker() {
   if (!("serviceWorker" in navigator)) return;
@@ -1410,7 +1410,7 @@ async function openAdd() {
   showSheet("add-sheet");
   scrollSheetBodyToTop("add-sheet");
   await loadCatalog();
-  renderCatalog({ resetScroll: true });
+  renderCatalog({ resetScroll: true, onlyPending: true });
 }
 
 async function loadCatalog() {
@@ -1428,26 +1428,39 @@ async function loadCatalog() {
 
 function renderCatalog(options) {
   const resetScroll = Boolean(options && options.resetScroll);
+  const onlyPending = Boolean(options && options.onlyPending);
   const status = document.getElementById("mac-status");
   const list = document.getElementById("catalog-list");
   const scroller = list.closest(".sheet-body");
   const scrollTop = scroller ? scroller.scrollTop : 0;
   list.replaceChildren();
   const pending = state.catalog.filter((entry) => !savedOnIpad(entry));
+  const entries = onlyPending ? pending : state.catalog;
   if (state.macError) {
     status.textContent = state.macError;
   } else if (state.catalog.length === 0) {
     status.textContent = "No songs on the computer yet.";
-  } else if (pending.length === 0) {
+  } else if (onlyPending && pending.length === 0) {
     status.textContent = "Every song on the computer is already " + onThisDevice() + ".";
+  } else if (!onlyPending && pending.length === 0) {
+    status.textContent = "Songs " + onThisDevice() + " are ready. Tap Play.";
   } else {
-    status.textContent = "Tap Download to put a song " + onThisDevice() + ".";
+    status.textContent = onlyPending
+      ? "Tap Download to put a song " + onThisDevice() + "."
+      : "New songs: Download. Songs already " + onThisDevice() + ": Play.";
   }
-  for (const entry of pending) {
+  for (const entry of entries) {
+    const already = savedOnIpad(entry);
+    const savedTrack = already ? trackForFile(entry.file) : null;
+    const playing = Boolean(savedTrack && savedTrack.id === state.currentId && state.playing);
     const row = document.createElement("div");
-    row.className = "catalog-row";
-    const text = document.createElement("div");
-    text.className = "text";
+    row.className = "catalog-row" + (already ? " saved" : "");
+    const text = document.createElement(already ? "button" : "div");
+    text.className = already ? "catalog-play" : "text";
+    if (already) {
+      text.type = "button";
+      text.dataset.playSaved = entry.file;
+    }
     const title = document.createElement("span");
     title.className = "song-title";
     title.textContent = entry.title;
@@ -1457,10 +1470,16 @@ function renderCatalog(options) {
     text.append(title, sub);
     const button = document.createElement("button");
     button.type = "button";
-    button.className = "download";
-    button.dataset.download = entry.file;
-    button.disabled = downloading.has(entry.file);
-    button.textContent = downloading.has(entry.file) ? "Downloading…" : "Download";
+    if (already) {
+      button.className = "download play-ready";
+      button.dataset.playSaved = entry.file;
+      button.textContent = playing ? "Playing" : "Play";
+    } else {
+      button.className = "download";
+      button.dataset.download = entry.file;
+      button.disabled = downloading.has(entry.file);
+      button.textContent = downloading.has(entry.file) ? "Downloading…" : "Download";
+    }
     row.append(text, button);
     list.append(row);
   }
