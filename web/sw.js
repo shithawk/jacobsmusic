@@ -1,11 +1,11 @@
-const CACHE = "jacob-shell-v18";
+const CACHE = "jacob-shell-v19";
 const SHELL = [
   "/",
   "/index.html",
   "/styles.css",
-  "/styles.css?v=8",
+  "/styles.css?v=9",
   "/app.js",
-  "/app.js?v=14",
+  "/app.js?v=15",
   "/manifest.webmanifest",
   "/favicon.ico?v=play1",
   "/youtube-logo.png",
