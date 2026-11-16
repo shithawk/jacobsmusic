@@ -48,7 +48,7 @@ cat >"$RUNTIME" <<EOF
 
 import $ROOT/caddy-routes.caddy
 
-http://127.0.0.1:8092 {
+:8092 {
 	bind 127.0.0.1
 	import jacob_routes
 }
