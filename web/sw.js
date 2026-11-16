@@ -1,9 +1,9 @@
-const CACHE = "jacob-shell-v28";
+const CACHE = "jacob-shell-v38";
 const SHELL = [
   "/",
   "/index.html",
   "/styles.css",
-  "/styles.css?v=15",
+  "/styles.css?v=25",
   "/app.js",
   "/app.js?v=20",
   "/manifest.webmanifest",
