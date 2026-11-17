@@ -4,7 +4,8 @@ const FAMILY_THEME_META = {
   wayne: "#0d0d0d",
   jacob: "#1e2329",
   dan: "#1a2332",
-  steff: "#2d1f3d"
+  steff: "#2d1f3d",
+  zero: "#0a0a0a"
 };
 const FAMILY_THEME_STORAGE = "family-theme";
 
@@ -28,7 +29,8 @@ const state = {
   openArtists: new Set(),
   openSearchArtists: new Set(),
   artistQueue: null,
-  catalogSessionDownloads: new Set()
+  catalogSessionDownloads: new Set(),
+  youtubeCatalog: []
 };
 
 let dbPromise = null;
@@ -188,7 +190,7 @@ let youtubeHasSearched = false;
 let linkConfirmId = "";
 const downloading = new Set();
 
-const SW_BUILD = "28";
+const SW_BUILD = "32";
 
 const MARQUEE_PAUSE_S = 3;
 const MARQUEE_HOLD_END_S = 3;
@@ -349,6 +351,10 @@ async function init() {
         " could not open saved songs. Leave private browsing, then add Jacob's Music to the Home Screen."
     );
   }
+  try {
+    await loadYouTubeCatalog();
+    await seedYouTubeCatalogOnce();
+  } catch { /* catalog is optional */ }
   if (state.shuffle) startShuffle(state.currentId);
   render();
   refreshSavedLinks();
@@ -388,16 +394,18 @@ function bindEvents() {
   document.getElementById("youtube-clear-results").addEventListener("click", () => {
     clearYouTubeSearch();
   });
-  document.getElementById("youtube-results").addEventListener("click", (event) => {
-    const play = event.target.closest("[data-play]");
-    if (play) {
-      playListed(play.dataset.play);
-      return;
-    }
-    const add = event.target.closest("[data-add-video]");
-    if (!add || add.disabled) return;
-    addYouTubeVideo(add.dataset.addVideo, add);
-  });
+  for (const id of ["youtube-results", "youtube-catalog-list"]) {
+    document.getElementById(id).addEventListener("click", (event) => {
+      const play = event.target.closest("[data-play]");
+      if (play) {
+        playListed(play.dataset.play);
+        return;
+      }
+      const add = event.target.closest("[data-add-video]");
+      if (!add || add.disabled) return;
+      addYouTubeVideo(add.dataset.addVideo, add);
+    });
+  }
   document.getElementById("video-list").addEventListener("click", (event) => {
     const fav = event.target.closest("[data-favorite]");
     if (fav) {
@@ -596,6 +604,9 @@ function render() {
   renderCatalog();
   renderArtists();
   renderVideos();
+  if (document.getElementById("videos-sheet") && !document.getElementById("videos-sheet").hidden) {
+    renderYouTubeCatalogFromComputer();
+  }
 }
 
 function renderSongs() {
@@ -1140,13 +1151,15 @@ function searchHeading(text) {
   return heading;
 }
 
-function openVideos() {
+async function openVideos() {
   hideSheet("add-sheet");
   hideSheet("manage-sheet");
   hideSheet("artists-sheet");
   hideConfirm();
   closePlayer();
   showSheet("videos-sheet");
+  await loadYouTubeCatalog();
+  renderYouTubeCatalogFromComputer();
   renderVideos();
 }
 
@@ -1217,13 +1230,86 @@ async function searchYouTube() {
   }
 }
 
+async function loadYouTubeCatalog() {
+  try {
+    const response = await fetch("/youtube-catalog.json", { cache: "no-store" });
+    if (!response.ok) throw new Error("catalog unavailable");
+    const entries = await response.json();
+    state.youtubeCatalog = Array.isArray(entries) ? entries : [];
+  } catch {
+    state.youtubeCatalog = [];
+  }
+}
 
+function renderYouTubeCatalogFromComputer() {
+  const list = document.getElementById("youtube-catalog-list");
+  const empty = document.getElementById("youtube-catalog-empty");
+  if (!list) return;
+  const items = state.youtubeCatalog
+    .map((entry) => ({
+      id: entry.videoId || entry.id,
+      title: entry.title,
+      artist: entry.artist
+    }))
+    .filter((item) => item.id);
+  if (empty) empty.hidden = items.length > 0;
+  renderYouTubeVideoRows(list, items);
+}
+
+async function seedYouTubeCatalogOnce() {
+  const flag = "jacob-youtube-catalog-seed";
+  try {
+    if (!state.youtubeCatalog.length) await loadYouTubeCatalog();
+    const entries = state.youtubeCatalog;
+    if (!Array.isArray(entries) || !entries.length) return;
+    const sig = entries
+      .map((entry) => entry.videoId || entry.id)
+      .filter(Boolean)
+      .sort()
+      .join("\n");
+    let alreadySeeded = false;
+    try {
+      alreadySeeded = localStorage.getItem(flag) === sig;
+    } catch { /* still try to seed */ }
+    if (alreadySeeded) return;
+    let changed = false;
+    for (const entry of entries) {
+      const id = entry.videoId || entry.id;
+      if (!id || youtubeTrack(id)) continue;
+      const track = {
+        id: "youtube:" + id,
+        title: (entry.title || "YouTube video").trim(),
+        artist: (entry.artist || "").trim(),
+        source: "youtube",
+        mediaRef: id,
+        bytes: 0,
+        createdAt: Date.now()
+      };
+      await putTrack(track);
+      state.tracks.push(track);
+      changed = true;
+    }
+    if (changed) {
+      state.tracks = sortTracks(state.tracks);
+      renderYouTubeCatalogFromComputer();
+    }
+    try {
+      localStorage.setItem(flag, sig);
+    } catch { /* private mode */ }
+  } catch { /* offline or no catalog */ }
+}
 
 function renderYouTubeResults(results) {
-  const list = document.getElementById("youtube-results");
+  renderYouTubeVideoRows(document.getElementById("youtube-results"), results);
+}
+
+function renderYouTubeVideoRows(list, results) {
+  if (!list) return;
   list.replaceChildren();
   for (const video of results) {
-    const saved = youtubeTrack(video.id);
+    const videoId = video.id || video.videoId;
+    if (!videoId) continue;
+    const saved = youtubeTrack(videoId);
     const row = document.createElement("div");
     row.className = "catalog-row" + (saved ? " saved" : "");
     const text = document.createElement(saved ? "button" : "div");
@@ -1234,7 +1320,7 @@ function renderYouTubeResults(results) {
     }
     const title = document.createElement("span");
     title.className = "song-title";
-    title.textContent = video.title;
+    title.textContent = video.title || "YouTube video";
     const sub = document.createElement("span");
     sub.className = "song-sub";
     sub.textContent = video.artist ? video.artist + " · YouTube" : "YouTube";
@@ -1244,9 +1330,9 @@ function renderYouTubeResults(results) {
     button.className = "download";
     if (saved) markYouTubePlay(button, saved);
     else {
-      button.dataset.addVideo = video.id;
-      button.dataset.videoTitle = video.title;
-      button.dataset.videoArtist = video.artist;
+      button.dataset.addVideo = videoId;
+      button.dataset.videoTitle = video.title || "";
+      button.dataset.videoArtist = video.artist || "";
       button.textContent = "Add";
     }
     row.append(text, button);
@@ -1299,6 +1385,7 @@ async function addYouTubeVideo(id, button) {
       text.replaceWith(playTitle);
     }
     markYouTubePlay(button, track);
+    renderYouTubeCatalogFromComputer();
     renderVideos();
     setNotice("Added " + title);
   } catch (error) {
@@ -3296,9 +3383,11 @@ function initFamilyTheme() {
     btn.addEventListener("click", () => {
       const next = btn.dataset.theme;
       if (!FAMILY_THEME_META[next]) return;
-      applyFamilyTheme(next);
+      const current = document.documentElement.getAttribute("data-family-theme");
+      const target = current === next ? "zero" : next;
+      applyFamilyTheme(target);
       try {
-        localStorage.setItem(FAMILY_THEME_STORAGE, next);
+        localStorage.setItem(FAMILY_THEME_STORAGE, target);
       } catch (_) {}
     });
   });

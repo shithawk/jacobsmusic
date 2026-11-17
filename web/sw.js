@@ -1,21 +1,23 @@
-const CACHE = "jacob-shell-v63";
+const CACHE = "jacob-shell-v86";
 const SHELL = [
   "/",
   "/index.html",
   "/styles.css",
   "/styles.css?v=49",
   "/themes.css",
-  "/themes.css?v=28",
+  "/themes.css?v=48",
   "/app.js",
-  "/app.js?v=34",
+  "/app.js?v=42",
   "/manifest.webmanifest",
+  "/manifest.webmanifest?v=j4",
   "/favicon.ico?v=play1",
   "/youtube-logo.png",
   "/images.jpg",
   "/images.jpg?v=jhero1",
-  "/icon-180.png?v=j3",
-  "/icon-512.png?v=j3",
-  "/icon-512-maskable.png?v=j3",
+  "/icon-180.png?v=j4",
+  "/icon-192.png?v=j4",
+  "/icon-512.png?v=j4",
+  "/icon-512-maskable.png?v=j4",
 ];
 
 self.addEventListener("install", (event) => {
@@ -70,7 +72,8 @@ self.addEventListener("fetch", (event) => {
     url.pathname === "/sw.js" ||
     url.pathname.startsWith("/music/") ||
     url.pathname.startsWith("/api/") ||
-    url.pathname === "/catalog.json"
+    url.pathname === "/catalog.json" ||
+    url.pathname === "/youtube-catalog.json"
   ) {
     return;
   }

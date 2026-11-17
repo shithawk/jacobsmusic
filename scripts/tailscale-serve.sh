@@ -12,7 +12,9 @@ tailscale serve status
 
 if ! lsof -iTCP:8092 -sTCP:LISTEN >/dev/null 2>&1; then
   echo "Starting Caddy for Jacob's (8092)…"
-  (cd "$ROOT" && caddy run --config Caddyfile) &
+  mkdir -p "$ROOT/caddy-data"
+  nohup caddy run --config "$ROOT/Caddyfile" >>"$ROOT/caddy-data/caddy.log" 2>&1 &
+  echo $! >"$ROOT/caddy-data/caddy.pid"
   sleep 1
 fi
 

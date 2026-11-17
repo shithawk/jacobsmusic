@@ -13,7 +13,7 @@
     (function () {
       var key = "family-theme";
       var def = "jacob";
-      var ok = { jori: 1, wayne: 1, jacob: 1, dan: 1, steff: 1 };
+      var ok = { jori: 1, wayne: 1, jacob: 1, dan: 1, steff: 1, zero: 1 };
       var t = null;
       try {
         t = localStorage.getItem(key);
@@ -41,10 +41,10 @@
     })();
   </script>
   <link rel="icon" href="/favicon.ico?v=play1">
-  <link rel="manifest" href="/manifest.webmanifest?v=j3">
-  <link rel="apple-touch-icon" sizes="180x180" href="/icon-180.png?v=j3">
+  <link rel="manifest" href="/manifest.webmanifest?v=j4">
+  <link rel="apple-touch-icon" sizes="180x180" href="/icon-180.png?v=j4">
   <link rel="stylesheet" href="/styles.css?v=49">
-  <link rel="stylesheet" href="/themes.css?v=28">
+  <link rel="stylesheet" href="/themes.css?v=48">
 </head>
 <body>
   <div class="top-nav">
@@ -224,6 +224,9 @@
     <div class="sheet">
       <div class="sheet-body">
         <h1>Videos</h1>
+        <h2 id="youtube-catalog-heading" class="on-device">From the computer</h2>
+        <p id="youtube-catalog-empty" class="finder-hint" hidden>Could not load the computer’s video list. Check Tailscale and try again.</p>
+        <div id="youtube-catalog-list"></div>
         <h2 class="youtube-heading">
           <span>Search</span>
           <img src="/youtube-logo.png" alt="YouTube">
@@ -278,6 +281,6 @@
     <button id="notice-action" class="notice-action" type="button" hidden>Open in YouTube</button>
   </div>
   <audio id="audio" playsinline preload="none"></audio>
-  <script src="/app.js?v=34" defer></script>
+  <script src="/app.js?v=42" defer></script>
 </body>
 </html>
