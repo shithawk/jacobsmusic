@@ -190,7 +190,7 @@ let youtubeHasSearched = false;
 let linkConfirmId = "";
 const downloading = new Set();
 
-const SW_BUILD = "39";
+const SW_BUILD = "43";
 
 const MARQUEE_PAUSE_S = 3;
 const MARQUEE_HOLD_END_S = 3;
@@ -1043,11 +1043,9 @@ function updateSearchClearButton() {
   const btn = document.getElementById("search-clear");
   const input = document.getElementById("nav-search-input");
   if (!btn || !input) return;
-  const show = input.value.length > 0;
-  btn.classList.toggle("is-empty", !show);
-  btn.setAttribute("aria-hidden", show ? "false" : "true");
-  if (show) btn.removeAttribute("tabindex");
-  else btn.setAttribute("tabindex", "-1");
+  const hasText = input.value.length > 0;
+  btn.classList.toggle("is-empty", !hasText);
+  btn.disabled = !hasText;
 }
 
 function clearSearch() {
