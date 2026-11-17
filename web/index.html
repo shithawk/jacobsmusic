@@ -44,7 +44,7 @@
   <link rel="manifest" href="/manifest.webmanifest?v=j4">
   <link rel="apple-touch-icon" sizes="180x180" href="/icon-180.png?v=j4">
   <link rel="stylesheet" href="/styles.css?v=49">
-  <link rel="stylesheet" href="/themes.css?v=48">
+  <link rel="stylesheet" href="/themes.css?v=51">
 </head>
 <body>
   <div class="top-nav">
@@ -72,7 +72,7 @@
   </div>
   <div id="songs" class="screen">
     <header class="banner home-only">
-      <img src="/images.jpg?v=jhero1" alt="">
+      <img id="home-hero" src="/heroes/jacob.jpg" alt="">
       <h1>My Fucking Music</h1>
     </header>
     <div class="stripe home-only" aria-hidden="true"><span class="accent"></span><span class="accent-alt"></span></div>
@@ -224,9 +224,6 @@
     <div class="sheet">
       <div class="sheet-body">
         <h1>Videos</h1>
-        <h2 id="youtube-catalog-heading" class="on-device">From the computer</h2>
-        <p id="youtube-catalog-empty" class="finder-hint" hidden>Could not load the computer’s video list. Check Tailscale and try again.</p>
-        <div id="youtube-catalog-list"></div>
         <h2 class="youtube-heading">
           <span>Search</span>
           <img src="/youtube-logo.png" alt="YouTube">
@@ -239,12 +236,12 @@
               <path d="M21.5 21.5 L31 31" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"></path>
             </svg>
           </button>
-          <input id="youtube-search" type="search" placeholder="Song or artist on YouTube" aria-label="Search YouTube" enterkeyhint="search" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false">
+          <input id="youtube-search" type="search" placeholder="Search song or artist on YouTube" aria-label="Search song or artist on YouTube" enterkeyhint="search" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false">
           <button id="youtube-search-go" type="submit">Search</button>
         </form>
         <p id="youtube-search-status" class="finder-hint" hidden></p>
         <div id="youtube-results"></div>
-        <h2 id="videos-local-heading" class="on-device">On this device</h2>
+        <h2 id="videos-local-heading" class="on-device">Stream videos</h2>
         <p id="videos-empty" class="empty" hidden>No videos on this device yet.</p>
         <div id="video-list"></div>
       </div>
@@ -281,6 +278,6 @@
     <button id="notice-action" class="notice-action" type="button" hidden>Open in YouTube</button>
   </div>
   <audio id="audio" playsinline preload="none"></audio>
-  <script src="/app.js?v=42" defer></script>
+  <script src="/app.js?v=47" defer></script>
 </body>
 </html>

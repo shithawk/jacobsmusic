@@ -143,8 +143,8 @@ function applyDeviceCopy() {
   set("confirm-title", "Remove from this " + deviceLabel() + "?");
   set("confirm-detail", "The saved file will be deleted " + on + " only.");
   set("artists-empty", "No songs " + on + " yet.");
-  set("videos-local-heading", onThisDevice().replace(/^on /, "On "));
-  set("videos-empty", "No videos " + on + " yet.");
+  set("videos-local-heading", "Stream videos");
+  set("videos-empty", "No stream videos yet.");
   const hintSub = document.querySelector("#install-hint .hint-sub");
   if (hintSub) {
     if (guestWiFiVisit()) {
@@ -190,7 +190,7 @@ let youtubeHasSearched = false;
 let linkConfirmId = "";
 const downloading = new Set();
 
-const SW_BUILD = "32";
+const SW_BUILD = "35";
 
 const MARQUEE_PAUSE_S = 3;
 const MARQUEE_HOLD_END_S = 3;
@@ -394,18 +394,16 @@ function bindEvents() {
   document.getElementById("youtube-clear-results").addEventListener("click", () => {
     clearYouTubeSearch();
   });
-  for (const id of ["youtube-results", "youtube-catalog-list"]) {
-    document.getElementById(id).addEventListener("click", (event) => {
-      const play = event.target.closest("[data-play]");
-      if (play) {
-        playListed(play.dataset.play);
-        return;
-      }
-      const add = event.target.closest("[data-add-video]");
-      if (!add || add.disabled) return;
-      addYouTubeVideo(add.dataset.addVideo, add);
-    });
-  }
+  document.getElementById("youtube-results").addEventListener("click", (event) => {
+    const play = event.target.closest("[data-play]");
+    if (play) {
+      playListed(play.dataset.play);
+      return;
+    }
+    const add = event.target.closest("[data-add-video]");
+    if (!add || add.disabled) return;
+    addYouTubeVideo(add.dataset.addVideo, add);
+  });
   document.getElementById("video-list").addEventListener("click", (event) => {
     const fav = event.target.closest("[data-favorite]");
     if (fav) {
@@ -604,9 +602,6 @@ function render() {
   renderCatalog();
   renderArtists();
   renderVideos();
-  if (document.getElementById("videos-sheet") && !document.getElementById("videos-sheet").hidden) {
-    renderYouTubeCatalogFromComputer();
-  }
 }
 
 function renderSongs() {
@@ -1158,8 +1153,6 @@ async function openVideos() {
   hideConfirm();
   closePlayer();
   showSheet("videos-sheet");
-  await loadYouTubeCatalog();
-  renderYouTubeCatalogFromComputer();
   renderVideos();
 }
 
@@ -1241,21 +1234,6 @@ async function loadYouTubeCatalog() {
   }
 }
 
-function renderYouTubeCatalogFromComputer() {
-  const list = document.getElementById("youtube-catalog-list");
-  const empty = document.getElementById("youtube-catalog-empty");
-  if (!list) return;
-  const items = state.youtubeCatalog
-    .map((entry) => ({
-      id: entry.videoId || entry.id,
-      title: entry.title,
-      artist: entry.artist
-    }))
-    .filter((item) => item.id);
-  if (empty) empty.hidden = items.length > 0;
-  renderYouTubeVideoRows(list, items);
-}
-
 async function seedYouTubeCatalogOnce() {
   const flag = "jacob-youtube-catalog-seed";
   try {
@@ -1289,10 +1267,7 @@ async function seedYouTubeCatalogOnce() {
       state.tracks.push(track);
       changed = true;
     }
-    if (changed) {
-      state.tracks = sortTracks(state.tracks);
-      renderYouTubeCatalogFromComputer();
-    }
+    if (changed) state.tracks = sortTracks(state.tracks);
     try {
       localStorage.setItem(flag, sig);
     } catch { /* private mode */ }
@@ -1385,7 +1360,6 @@ async function addYouTubeVideo(id, button) {
       text.replaceWith(playTitle);
     }
     markYouTubePlay(button, track);
-    renderYouTubeCatalogFromComputer();
     renderVideos();
     setNotice("Added " + title);
   } catch (error) {
@@ -3385,6 +3359,11 @@ function initFamilyTheme() {
       if (!FAMILY_THEME_META[next]) return;
       const current = document.documentElement.getAttribute("data-family-theme");
       const target = current === next ? "zero" : next;
+      if (target === "zero") {
+        try {
+          localStorage.setItem(ZERO_HERO_FOR_KEY, next);
+        } catch (_) {}
+      }
       applyFamilyTheme(target);
       try {
         localStorage.setItem(FAMILY_THEME_STORAGE, target);
@@ -3393,12 +3372,53 @@ function initFamilyTheme() {
   });
 }
 
+const ZERO_HERO_FOR_KEY = "family-theme-zero-for";
+
+const FAMILY_HEROES = {
+  jori: "/heroes/jori.jpg",
+  wayne: "/heroes/wayne.jpeg",
+  jacob: "/heroes/jacob.jpg",
+  dan: "/heroes/dan.jpg",
+  steff: "/heroes/steff.jpg"
+};
+
+const FAMILY_HEROES_BW = {
+  jori: "/heroes/joriBW.jpg",
+  wayne: "/heroes/wayneBW.jpg",
+  jacob: "/heroes/jacobBW.jpg",
+  dan: "/heroes/danBW.jpg",
+  steff: "/heroes/steffBW.jpg"
+};
+
+function zeroHeroFor() {
+  try {
+    const stored = localStorage.getItem(ZERO_HERO_FOR_KEY);
+    if (stored && FAMILY_HEROES_BW[stored]) return stored;
+  } catch (_) {}
+  return DEFAULT_FAMILY_THEME;
+}
+
+function applyHomeHero(theme) {
+  const img = document.getElementById("home-hero");
+  if (!img) return;
+  let src;
+  if (theme === "zero") {
+    const key = zeroHeroFor();
+    src = FAMILY_HEROES_BW[key] || FAMILY_HEROES_BW[DEFAULT_FAMILY_THEME];
+  } else {
+    src = FAMILY_HEROES[theme] || FAMILY_HEROES[DEFAULT_FAMILY_THEME];
+  }
+  if (src && img.getAttribute("src") !== src) img.src = src;
+}
+
 function applyFamilyTheme(theme) {
   document.documentElement.setAttribute("data-family-theme", theme);
+  applyHomeHero(theme);
   const meta = document.querySelector('meta[name="theme-color"]');
   if (meta) meta.setAttribute("content", FAMILY_THEME_META[theme]);
+  const zeroFor = zeroHeroFor();
   document.querySelectorAll(".theme-chip").forEach((btn) => {
-    const on = btn.dataset.theme === theme;
+    const on = theme === "zero" ? btn.dataset.theme === zeroFor : btn.dataset.theme === theme;
     btn.classList.toggle("is-active", on);
     btn.setAttribute("aria-pressed", on ? "true" : "false");
   });
