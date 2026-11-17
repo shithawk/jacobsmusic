@@ -638,8 +638,12 @@ html.iphone[data-family-theme="dan"] .transport #shuffle.is-on {
 }
 
 .theme-picker-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
   width: 100%;
-  margin-top: 6px;
+  margin-top: 28px;
+  margin-bottom: 0;
 }
 
 .theme-picker-label {
@@ -653,6 +657,8 @@ html.iphone[data-family-theme="dan"] .transport #shuffle.is-on {
 
 .theme-picker-label-stripe {
   display: block;
+  flex: 0 0 auto;
+  width: 100%;
   height: 5px;
   border-radius: 3px;
   border: 1px solid #000;
@@ -666,6 +672,21 @@ html.iphone[data-family-theme="dan"] .transport #shuffle.is-on {
     var(--accent-alt) 42% 77.84%,
     color-mix(in srgb, var(--accent-alt) 75%, #fff) 77.84% 100%
   );
+}
+
+body.section-home #finder > .theme-picker-bottom-stripe {
+  position: relative;
+  z-index: 2;
+  flex: 0 0 auto;
+  margin: 8px 0 28px;
+}
+
+body.section-home .actions {
+  padding-bottom: 0;
+}
+
+body.section-home #finder {
+  padding-top: 0;
 }
 
 .theme-picker-label-text {
@@ -754,7 +775,17 @@ html[data-family-theme="zero"] .theme-chip.is-active {
 }
 
 html.iphone .theme-picker-wrap {
-  margin-top: 4px;
+  margin-top: 22px;
+  margin-bottom: 0;
+}
+
+html.iphone .home-songs-sign {
+  padding: 0 12px;
+}
+
+html.iphone .home-songs-sign-text {
+  font-size: clamp(2.1rem, 10vw, 2.8rem);
+  letter-spacing: 0.05em;
 }
 
 html.iphone .theme-picker-label {
@@ -764,6 +795,14 @@ html.iphone .theme-picker-label {
 
 html.iphone .theme-picker-label-stripe {
   height: 4px;
+}
+
+html.iphone body.section-home #finder > .theme-picker-bottom-stripe {
+  margin: 6px 0 22px;
+}
+
+html.iphone body.section-home #finder {
+  padding-top: 0;
 }
 
 html.iphone .theme-picker-label-text {
