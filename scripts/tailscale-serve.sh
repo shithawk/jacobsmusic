@@ -1,12 +1,13 @@
 #!/bin/bash
 # Expose Jacob's Music on Tailscale (tailnet only).
-#   Jacob's → https://<machine>.<tailnet>.ts.net:8444/  (Caddy :8092)
+#   Jacob's → https://<machine>.<tailnet>.ts.net:8443/ or :8444/  (Caddy :8092)
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 QR="$ROOT/images/jacobsmusic-tailscale-qr.png"
 
-echo "Tailscale Serve: Jacob's on :8092 (HTTPS :8444)"
+echo "Tailscale Serve: Jacob's on :8092 (HTTPS :8443 and :8444)"
+tailscale serve --bg --https=8443 "http://127.0.0.1:8092"
 tailscale serve --bg --https=8444 "http://127.0.0.1:8092"
 tailscale serve status
 
@@ -20,7 +21,7 @@ fi
 
 DNS="$(tailscale status --json 2>/dev/null | python3 -c 'import json,sys; print(json.load(sys.stdin)["Self"]["DNSName"].rstrip("."))' 2>/dev/null || true)"
 if [[ -n "$DNS" ]]; then
-  URL="https://${DNS}:8444/"
+  URL="https://${DNS}:8443/"
   python3 - "$URL" "$QR" <<'PY'
 import sys
 from pathlib import Path

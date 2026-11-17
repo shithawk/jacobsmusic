@@ -190,7 +190,7 @@ let youtubeHasSearched = false;
 let linkConfirmId = "";
 const downloading = new Set();
 
-const SW_BUILD = "37";
+const SW_BUILD = "39";
 
 const MARQUEE_PAUSE_S = 3;
 const MARQUEE_HOLD_END_S = 3;
@@ -431,10 +431,12 @@ function bindEvents() {
     const value = navSearchInput.value;
     if (value === navSearchSeen) return;
     navSearchSeen = value;
+    updateSearchClearButton();
     if (!value.trim() && !document.body.classList.contains("search-page")) return;
     showSearch({ typing: true });
   };
   navSearchInput.addEventListener("input", syncNavSearch);
+  navSearchInput.addEventListener("input", updateSearchClearButton);
   navSearchInput.addEventListener("keyup", syncNavSearch);
   navSearchInput.addEventListener("search", syncNavSearch);
   navSearchInput.addEventListener("focus", () => {
@@ -446,6 +448,7 @@ function bindEvents() {
     };
     navSearchWatch = window.setTimeout(watch, 150);
   });
+  updateSearchClearButton();
   navSearchInput.addEventListener("blur", () => window.clearTimeout(navSearchWatch));
   document.getElementById("nav-search-input").addEventListener("keydown", (event) => {
     if (event.key !== "Enter") return;
@@ -1035,12 +1038,25 @@ function openArtists(name) {
   }
 }
 
+
+function updateSearchClearButton() {
+  const btn = document.getElementById("search-clear");
+  const input = document.getElementById("nav-search-input");
+  if (!btn || !input) return;
+  const show = input.value.length > 0;
+  btn.classList.toggle("is-empty", !show);
+  btn.setAttribute("aria-hidden", show ? "false" : "true");
+  if (show) btn.removeAttribute("tabindex");
+  else btn.setAttribute("tabindex", "-1");
+}
+
 function clearSearch() {
   const input = document.getElementById("nav-search-input");
   input.value = "";
   state.searchQuery = "";
   state.openSearchArtists.clear();
   if (document.body.classList.contains("search-page")) renderSearchResults();
+  updateSearchClearButton();
   input.focus();
 }
 
@@ -1073,6 +1089,7 @@ function showSearch(options) {
     syncNavCurrent();
   }
   if (!typing) input.blur();
+  updateSearchClearButton();
   renderSearchResults();
 }
 

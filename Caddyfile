@@ -5,8 +5,9 @@
 
 # Jacob's Music — local port 8092 (Jori :8090, Wayne :8091 on the same Mac).
 # Tailscale:
+#   tailscale serve --bg --https=8443 http://127.0.0.1:8092
 #   tailscale serve --bg --https=8444 http://127.0.0.1:8092
-#   https://<machine>.<tailnet>.ts.net:8444/
+#   https://<machine>.<tailnet>.ts.net:8443/  (or :8444/)
 # Guest on same Wi-Fi (HTTPS, no Tailscale): ./scripts/guest-serve.sh
 # Start from this folder:
 #   caddy run --config Caddyfile

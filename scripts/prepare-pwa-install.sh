@@ -31,7 +31,7 @@ if ! curl -sf --max-time 3 "http://127.0.0.1:8092/" >/dev/null; then
 fi
 echo "  OK http://127.0.0.1:8092/"
 
-echo "4/4 Tailscale Serve (:8444 → :8092)…"
+echo "4/4 Tailscale Serve (:8443 + :8444 → :8092)…"
 bash "$ROOT/scripts/tailscale-serve.sh"
 
 MP3_COUNT="$(python3 -c "import json; print(len(json.load(open('$ROOT/music/catalog.json'))))" 2>/dev/null || echo "?")"
@@ -46,7 +46,7 @@ echo "Catalog: ${MP3_COUNT} songs on Mac (~${MB} MB), ${YT_COUNT} YouTube entrie
 echo ""
 if [[ -n "$DNS" ]]; then
   echo "Tailscale (Android / phone with Tailscale on, same account):"
-  echo "  https://${DNS}:8444/"
+  echo "  https://${DNS}:8443/  (or :8444/)"
   echo "  QR:  $ROOT/images/jacobsmusic-tailscale-qr.png"
   echo ""
   echo "  Chrome → open URL → ⋮ → Install app (or Update if already installed)."
