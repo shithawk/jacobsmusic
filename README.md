@@ -10,13 +10,23 @@ caddy run --config Caddyfile
 
 Listens on `127.0.0.1:8092`.
 
-## Tailscale
+## Tailscale (Android PWA)
+
+One-shot before installing or updating on a phone:
+
+```bash
+./scripts/prepare-pwa-install.sh
+```
+
+That rebuilds catalogs, starts Caddy on `:8092`, runs Tailscale Serve on `:8444`, and refreshes `images/jacobsmusic-tailscale-qr.png`.
+
+Or only Tailscale:
 
 ```bash
 ./scripts/tailscale-serve.sh
 ```
 
-Site URL: `https://<your-machine>.<tailnet>.ts.net:8444/`
+Site URL: `https://<your-machine>.<tailnet>.ts.net:8444/` — Chrome → **Install app** (or open once to pull a service-worker update).
 
 ## Guest install (same Wi‑Fi, no Tailscale)
 

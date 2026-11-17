@@ -1,4 +1,4 @@
-const CACHE = "jacob-shell-v92";
+const CACHE = "jacob-shell-v93";
 const SHELL = [
   "/",
   "/index.html",
@@ -7,7 +7,7 @@ const SHELL = [
   "/themes.css",
   "/themes.css?v=51",
   "/app.js",
-  "/app.js?v=47",
+  "/app.js?v=48",
   "/heroes/jori.jpg",
   "/heroes/joriBW.jpg",
   "/heroes/wayne.jpeg",
@@ -19,15 +19,15 @@ const SHELL = [
   "/heroes/steff.jpg",
   "/heroes/steffBW.jpg",
   "/manifest.webmanifest",
-  "/manifest.webmanifest?v=j4",
+  "/manifest.webmanifest?v=j5",
   "/favicon.ico?v=play1",
   "/youtube-logo.png",
   "/images.jpg",
   "/images.jpg?v=jhero1",
-  "/icon-180.png?v=j4",
-  "/icon-192.png?v=j4",
-  "/icon-512.png?v=j4",
-  "/icon-512-maskable.png?v=j4",
+  "/icon-180.png?v=j5",
+  "/icon-192.png?v=j5",
+  "/icon-512.png?v=j5",
+  "/icon-512-maskable.png?v=j5",
 ];
 
 self.addEventListener("install", (event) => {
