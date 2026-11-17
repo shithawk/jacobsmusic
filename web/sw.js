@@ -1,13 +1,13 @@
-const CACHE = "jacob-shell-v105";
+const CACHE = "jacob-shell-v106";
 const SHELL = [
   "/",
   "/index.html",
   "/styles.css",
-  "/styles.css?v=138",
+  "/styles.css?v=151",
   "/themes.css",
-  "/themes.css?v=83",
+  "/themes.css?v=104",
   "/app.js",
-  "/app.js?v=107",
+  "/app.js?v=108",
   "/heroes/jori.jpg",
   "/heroes/joriBW.jpg",
   "/heroes/wayne.jpeg",
@@ -21,7 +21,7 @@ const SHELL = [
   "/manifest.webmanifest",
   "/manifest.webmanifest?v=j5",
   "/favicon.ico?v=play1",
-  "/youtube-logo.png",
+  "/youtube-logo.png?v=jyt1",
   "/images.jpg",
   "/images.jpg?v=jhero1",
   "/icon-180.png?v=j5",
