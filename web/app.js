@@ -3,7 +3,7 @@ const FAMILY_THEME_META = {
   jori: "#121a32",
   wayne: "#0d0d0d",
   jacob: "#1e2329",
-  dan: "#1a2332",
+  dan: "#1c2a34",
   steff: "#2d1f3d",
   zero: "#0a0a0a"
 };
@@ -29,9 +29,10 @@ const state = {
   openArtists: new Set(),
   openSearchArtists: new Set(),
   artistQueue: null,
-  catalogSessionDownloads: new Set(),
-  youtubeCatalog: []
+  catalogSessionDownloads: new Set()
 };
+
+let zeroPlayPhase = 0;
 
 let dbPromise = null;
 const fileBlobs = new Map();
@@ -48,18 +49,6 @@ function localPreviewIPhone() {
   return q.get("iphone") === "1" || q.get("phone") === "1";
 }
 
-function localPreviewAndroid() {
-  const h = location.hostname;
-  const local = h === "localhost" || h === "127.0.0.1" || h === "[::1]";
-  if (!local) return false;
-  const q = new URLSearchParams(location.search);
-  return q.get("android") === "1";
-}
-
-function androidInstallHints() {
-  return isAndroidPhone() || localPreviewAndroid();
-}
-
 function isAndroidPhone() {
   const ua = navigator.userAgent;
   return /Android/i.test(ua) && /Mobile/i.test(ua);
@@ -72,7 +61,7 @@ function isIPadLike() {
 
 /** Compact phone UI (html.iphone) — not the same as deviceLabel / install copy. */
 function compactPhoneLayout() {
-  if (localPreviewIPhone() || localPreviewAndroid()) return true;
+  if (localPreviewIPhone()) return true;
   const ua = navigator.userAgent;
   if (/iPhone|iPod/.test(ua)) return true;
   if (isAndroidPhone()) return true;
@@ -104,19 +93,6 @@ function onThisDevice() {
   return "on this " + deviceLabel();
 }
 
-function isPrivateLanHost() {
-  const h = location.hostname;
-  if (h === "localhost" || h === "127.0.0.1" || h === "[::1]") return false;
-  if (/^192\.168\.\d{1,3}\.\d{1,3}$/.test(h)) return true;
-  if (/^10\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(h)) return true;
-  if (/^172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}$/.test(h)) return true;
-  return false;
-}
-
-function guestWiFiVisit() {
-  return isPrivateLanHost() || location.search.indexOf("guest=1") !== -1;
-}
-
 function applyDeviceCopy() {
   const on = onThisDevice();
   const set = (id, text) => {
@@ -125,49 +101,23 @@ function applyDeviceCopy() {
   };
   set(
     "install-hint-text",
-    androidInstallHints()
-      ? "Install: in Chrome, tap ⋮ (top right), then Install app or Add to Home screen."
-      : deviceKind() === "iphone"
-        ? "Install Jacob's Music: in Safari, tap Share at the bottom of the screen, then Add to Home Screen."
-        : "Install Jacob's Music: tap Share, then Add to Home Screen."
+    deviceKind() === "iphone"
+      ? "Install Jacob's Music: in Safari, tap Share at the bottom of the screen, then Add to Home Screen."
+      : "Install Jacob's Music: tap Share, then Add to Home Screen."
   );
   set("empty", "Tap + Add music to put songs " + on + ".");
-  set(
-    "mirror-hint",
-    deviceKind() === "iphone"
-      ? "To play on a TV or speaker, open Control Center, tap AirPlay, then choose the device."
-      : "To listen on the TV, swipe down from the top-right corner of the iPad, tap Screen Mirroring, then choose the TV."
-  );
-  set("from-ipad", "Choose a song saved " + on);
+  set("from-ipad", "Add a song saved on this device");
   set("manage-lede", "This takes a song off this " + deviceLabel() + ".");
   set("confirm-title", "Remove from this " + deviceLabel() + "?");
   set("artists-empty", "No songs " + on + " yet.");
-  set("videos-local-heading", "Stream videos");
-  set("videos-empty", "No stream videos yet.");
+  set("videos-local-heading", "Stream");
+  set("videos-empty", "No videos " + on + " yet.");
   const hintSub = document.querySelector("#install-hint .hint-sub");
-  if (hintSub) {
-    if (guestWiFiVisit()) {
-      hintSub.hidden = false;
-      hintSub.textContent = androidInstallHints()
-        ? "Same Wi‑Fi as the Mac. If Chrome warns about the certificate, tap Advanced → Proceed. Then ⋮ → Install app. Use + Add music on Wi‑Fi to download songs."
-        : deviceKind() === "iphone"
-          ? "Same Wi‑Fi as the Mac. In Safari, trust the certificate if asked, then Share → Add to Home Screen. Use + Add music on Wi‑Fi to download songs."
-          : "Same Wi‑Fi as the Mac. Install from the browser, then use + Add music on Wi‑Fi to download songs.";
-    } else if (androidInstallHints()) {
-      hintSub.hidden = false;
-      hintSub.textContent =
-        "On Android, open this link in Chrome while Tailscale is on, then use ⋮ → Install app or Install and create shortcut.";
-    } else if (deviceKind() === "iphone") {
-      hintSub.hidden = false;
-      hintSub.textContent =
-        "On iPhone, open this link in Safari while Tailscale is on, then add to the Home Screen.";
-    } else {
-      hintSub.hidden = true;
-    }
-  }
+  if (hintSub) hintSub.hidden = deviceKind() !== "iphone";
   document.documentElement.classList.toggle("iphone", compactPhoneLayout());
   document.documentElement.classList.toggle("ipad", deviceKind() === "ipad");
   updateShuffleButton();
+  updateZeroPlayButton();
 }
 let ytPlayer = null;
 let ytReady = false;
@@ -189,7 +139,7 @@ let youtubeHasSearched = false;
 let linkConfirmId = "";
 const downloading = new Set();
 
-const SW_BUILD = "46";
+const SW_BUILD = "45";
 
 const MARQUEE_PAUSE_S = 3;
 const MARQUEE_HOLD_END_S = 3;
@@ -313,6 +263,11 @@ async function init() {
   window.addEventListener("resize", applyDeviceCopy);
   document.getElementById("install-hint").hidden = standalone();
   state.shuffle = loadShuffle();
+  if (isZeroTheme()) {
+    state.shuffle = false;
+    saveShuffle();
+    zeroPlayPhase = 0;
+  }
   bindEvents();
   bindMediaSession();
   audio().addEventListener("play", () => { if (isSource("local")) setPlaying(true); });
@@ -350,10 +305,7 @@ async function init() {
         " could not open saved songs. Leave private browsing, then add Jacob's Music to the Home Screen."
     );
   }
-  try {
-    await loadYouTubeCatalog();
-    await seedYouTubeCatalogOnce();
-  } catch { /* catalog is optional */ }
+  await mergeYouTubeCatalogFromMac();
   if (state.shuffle) startShuffle(state.currentId);
   render();
   refreshSavedLinks();
@@ -411,8 +363,8 @@ function bindEvents() {
       toggleFavorite(fav.dataset.favorite);
       return;
     }
-    const button = event.target.closest(".song[data-play]");
-    if (button) playListed(button.dataset.play);
+    const row = event.target.closest(".song[data-play]");
+    if (row) playListed(row.dataset.play);
   });
   document.getElementById("nav-search").addEventListener("submit", (event) => {
     event.preventDefault();
@@ -492,9 +444,9 @@ function bindEvents() {
       toggleFavorite(fav.dataset.favorite);
       return;
     }
-    const button = event.target.closest(".song[data-play]");
-    if (button) {
-      playListed(button.dataset.play);
+    const songRow = event.target.closest(".song[data-play]");
+    if (songRow) {
+      playListed(songRow.dataset.play);
       return;
     }
     const row = event.target.closest("[data-artist]");
@@ -532,9 +484,9 @@ function bindEvents() {
       toggleFavorite(fav.dataset.favorite);
       return;
     }
-    const button = event.target.closest(".song[data-play]");
-    if (!button) return;
-    playListed(button.dataset.play);
+    const row = event.target.closest(".song[data-play]");
+    if (!row) return;
+    playListed(row.dataset.play);
   });
   document.getElementById("catalog-list").addEventListener("click", (event) => {
     const saved = event.target.closest("[data-play-saved]");
@@ -572,6 +524,10 @@ function bindEvents() {
   document.getElementById("previous").addEventListener("click", () => skip(-1));
   document.getElementById("next").addEventListener("click", () => skip(1));
   document.getElementById("play-button").addEventListener("click", () => {
+    if (isZeroTheme()) {
+      zeroPlayButtonClick();
+      return;
+    }
     if (isAudiblyPlaying()) userPause();
     else userPlay(currentTrack() || songToStart(), playerIsOpen());
   });
@@ -601,6 +557,7 @@ function render() {
   renderSearchResults();
   renderPlayer();
   updateShuffleButton();
+  updateZeroPlayButton();
   renderCatalog();
   renderArtists();
   renderVideos();
@@ -1081,10 +1038,10 @@ function showSearch(options) {
     hideConfirm();
     closePlayer();
     document.body.classList.remove("songs-page");
-    document.body.classList.add("search-page");
-    document.getElementById("songs").scrollTop = 0;
-    syncNavCurrent();
-  }
+  document.body.classList.add("search-page");
+  document.getElementById("songs").scrollTop = 0;
+  syncNavCurrent();
+}
   if (!typing) input.blur();
   updateSearchClearButton();
   renderSearchResults();
@@ -1165,7 +1122,7 @@ function searchHeading(text) {
   return heading;
 }
 
-async function openVideos() {
+function openVideos() {
   hideSheet("add-sheet");
   hideSheet("manage-sheet");
   hideSheet("artists-sheet");
@@ -1173,6 +1130,43 @@ async function openVideos() {
   closePlayer();
   showSheet("videos-sheet");
   renderVideos();
+}
+
+async function mergeYouTubeCatalogFromMac() {
+  let entries;
+  try {
+    const response = await fetch("/youtube-catalog.json", { cache: "no-store" });
+    if (!response.ok) return;
+    const payload = await response.json();
+    entries = Array.isArray(payload) ? payload : [];
+  } catch {
+    return;
+  }
+  if (!entries.length) return;
+  let changed = false;
+  for (const entry of entries) {
+    const id = sanitizeYouTubeID(entry.videoId);
+    if (!id) continue;
+    if (state.tracks.some((track) => track.source === "youtube" && track.mediaRef === id)) continue;
+    const track = {
+      id: "youtube:" + id,
+      title: String(entry.title || "YouTube video").trim(),
+      artist: String(entry.artist || "").trim(),
+      source: "youtube",
+      mediaRef: id,
+      bytes: 0,
+      createdAt: Date.now()
+    };
+    try {
+      await putTrack(track);
+      state.tracks.push(track);
+      changed = true;
+    } catch { /* IndexedDB may be unavailable in a transient tab. */ }
+  }
+  if (!changed) return;
+  state.tracks = sortTracks(state.tracks);
+  render();
+  if (!document.getElementById("videos-sheet").hidden) renderVideos();
 }
 
 function renderVideos() {
@@ -1187,7 +1181,7 @@ function renderVideos() {
   list.replaceChildren();
   document.getElementById("videos-empty").hidden = videos.length > 0;
   for (const track of videos) list.append(songBox(track));
-  if (scroller) scroller.scrollTop = resetScroll ? 0 : scrollTop;
+  if (scroller) scroller.scrollTop = scrollTop;
 }
 
 function setVideoSearchStatus(text) {
@@ -1242,57 +1236,6 @@ async function searchYouTube() {
   }
 }
 
-async function loadYouTubeCatalog() {
-  try {
-    const response = await fetch("/youtube-catalog.json", { cache: "no-store" });
-    if (!response.ok) throw new Error("catalog unavailable");
-    const entries = await response.json();
-    state.youtubeCatalog = Array.isArray(entries) ? entries : [];
-  } catch {
-    state.youtubeCatalog = [];
-  }
-}
-
-async function seedYouTubeCatalogOnce() {
-  const flag = "jacob-youtube-catalog-seed";
-  try {
-    if (!state.youtubeCatalog.length) await loadYouTubeCatalog();
-    const entries = state.youtubeCatalog;
-    if (!Array.isArray(entries) || !entries.length) return;
-    const sig = entries
-      .map((entry) => entry.videoId || entry.id)
-      .filter(Boolean)
-      .sort()
-      .join("\n");
-    let alreadySeeded = false;
-    try {
-      alreadySeeded = localStorage.getItem(flag) === sig;
-    } catch { /* still try to seed */ }
-    if (alreadySeeded) return;
-    let changed = false;
-    for (const entry of entries) {
-      const id = entry.videoId || entry.id;
-      if (!id || youtubeTrack(id)) continue;
-      const track = {
-        id: "youtube:" + id,
-        title: (entry.title || "YouTube video").trim(),
-        artist: (entry.artist || "").trim(),
-        source: "youtube",
-        mediaRef: id,
-        bytes: 0,
-        createdAt: Date.now()
-      };
-      await putTrack(track);
-      state.tracks.push(track);
-      changed = true;
-    }
-    if (changed) state.tracks = sortTracks(state.tracks);
-    try {
-      localStorage.setItem(flag, sig);
-    } catch { /* private mode */ }
-  } catch { /* offline or no catalog */ }
-}
-
 function renderYouTubeResults(results) {
   renderYouTubeVideoRows(document.getElementById("youtube-results"), results);
 }
@@ -1301,9 +1244,7 @@ function renderYouTubeVideoRows(list, results) {
   if (!list) return;
   list.replaceChildren();
   for (const video of results) {
-    const videoId = video.id || video.videoId;
-    if (!videoId) continue;
-    const saved = youtubeTrack(videoId);
+    const saved = youtubeTrack(video.id);
     const row = document.createElement("div");
     row.className = "catalog-row" + (saved ? " saved" : "");
     const text = document.createElement(saved ? "button" : "div");
@@ -1314,7 +1255,7 @@ function renderYouTubeVideoRows(list, results) {
     }
     const title = document.createElement("span");
     title.className = "song-title";
-    title.textContent = video.title || "YouTube video";
+    title.textContent = video.title;
     const sub = document.createElement("span");
     sub.className = "song-sub";
     sub.textContent = video.artist ? video.artist + " · YouTube" : "YouTube";
@@ -1324,9 +1265,9 @@ function renderYouTubeVideoRows(list, results) {
     button.className = "download";
     if (saved) markYouTubePlay(button, saved);
     else {
-      button.dataset.addVideo = videoId;
-      button.dataset.videoTitle = video.title || "";
-      button.dataset.videoArtist = video.artist || "";
+      button.dataset.addVideo = video.id;
+      button.dataset.videoTitle = video.title;
+      button.dataset.videoArtist = video.artist;
       button.textContent = "Add";
     }
     row.append(text, button);
@@ -1523,9 +1464,12 @@ function setPlaying(playing) {
   state.playing = playing;
   if (playing) streamingHold = isStreamingTrack(currentTrack());
   else if (!appInBackground()) streamingHold = false;
-  document.getElementById("play-label").textContent = playing ? "Pause" : "Play";
   const playButton = document.getElementById("play-button");
-  playButton.setAttribute("aria-label", playing ? "Pause" : "Play");
+  if (isZeroTheme()) updateZeroPlayButton();
+  else {
+    document.getElementById("play-label").textContent = playing ? "Pause" : "Play";
+    playButton.setAttribute("aria-label", playing ? "Pause" : "Play");
+  }
   playButton.classList.toggle("is-playing", playing);
   if ("mediaSession" in navigator) {
     navigator.mediaSession.playbackState = playing ? "playing" : "paused";
@@ -2675,6 +2619,59 @@ function shuffleIds(ids) {
   return copy;
 }
 
+function isZeroTheme() {
+  return document.documentElement.getAttribute("data-family-theme") === "zero";
+}
+
+function zeroPlayButtonClick() {
+  const track = currentTrack() || songToStart();
+
+  if (isAudiblyPlaying()) {
+    if (!state.shuffle) {
+      setShuffle(true);
+      zeroPlayPhase = 2;
+    } else {
+      setShuffle(false);
+      userPause();
+      zeroPlayPhase = 0;
+    }
+    updateZeroPlayButton();
+    return;
+  }
+
+  if (zeroPlayPhase === 0) {
+    setShuffle(false);
+    if (track) userPlay(track, playerIsOpen());
+    zeroPlayPhase = 1;
+  } else if (zeroPlayPhase === 1) {
+    setShuffle(true);
+    if (track) userPlay(track, playerIsOpen());
+    zeroPlayPhase = 2;
+  } else {
+    setShuffle(false);
+    zeroPlayPhase = 0;
+  }
+  updateZeroPlayButton();
+}
+
+function updateZeroPlayButton() {
+  const playButton = document.getElementById("play-button");
+  if (!playButton) return;
+  if (!isZeroTheme()) {
+    playButton.classList.remove("is-shuffle-on");
+    return;
+  }
+  const playing = isAudiblyPlaying();
+  const shuffleVisual = state.shuffle && (playing || zeroPlayPhase >= 2);
+  playButton.classList.toggle("is-shuffle-on", shuffleVisual);
+  let label = "Play";
+  if (playing && state.shuffle) label = "Stop";
+  else if (playing) label = "Shuffle";
+  else if (zeroPlayPhase === 1) label = "Shuffle";
+  else if (zeroPlayPhase === 2) label = "Stop";
+  playButton.setAttribute("aria-label", label);
+}
+
 function setShuffle(on) {
   state.shuffle = on;
   state.shuffleHistory = [];
@@ -2682,6 +2679,7 @@ function setShuffle(on) {
   if (on) startShuffle(state.currentId);
   saveShuffle();
   updateShuffleButton();
+  updateZeroPlayButton();
 }
 
 function updateShuffleButton() {
@@ -2698,7 +2696,7 @@ function updateShuffleButton() {
 
 function loadShuffle() {
   try {
-    return localStorage.getItem("jacob-shuffle") === "on";
+    return localStorage.getItem("waynes-shuffle") === "on";
   } catch {
     return false;
   }
@@ -2706,7 +2704,7 @@ function loadShuffle() {
 
 function saveShuffle() {
   try {
-    localStorage.setItem("jacob-shuffle", state.shuffle ? "on" : "off");
+    localStorage.setItem("waynes-shuffle", state.shuffle ? "on" : "off");
   } catch {
     // The button still shows the choice for this visit.
   }
@@ -3254,6 +3252,7 @@ function parsePictureFrame(frame, v22) {
   return new Blob([data], { type: mime.split(";")[0].trim() || "image/jpeg" });
 }
 
+
 const ID3_READ_MIN = 256 * 1024;
 const ID3_READ_MAX = 2 * 1024 * 1024;
 
@@ -3365,7 +3364,7 @@ async function requestPersist() {
 function openDB() {
   if (dbPromise) return dbPromise;
   dbPromise = new Promise((resolve, reject) => {
-    const request = indexedDB.open("jacobsmusic", 2);
+    const request = indexedDB.open("waynesmusic", 2);
     request.onupgradeneeded = () => {
       const db = request.result;
       if (!db.objectStoreNames.contains("tracks")) db.createObjectStore("tracks", { keyPath: "id" });
@@ -3525,6 +3524,19 @@ function applyFamilyTheme(theme) {
     btn.classList.toggle("is-active", on);
     btn.setAttribute("aria-pressed", on ? "true" : "false");
   });
+  if (theme === "zero") {
+    zeroPlayPhase = 0;
+    if (state.shuffle) {
+      state.shuffle = false;
+      state.shuffleHistory = [];
+      state.shuffleRewind = false;
+      saveShuffle();
+    }
+  } else {
+    zeroPlayPhase = 0;
+  }
+  updateShuffleButton();
+  updateZeroPlayButton();
 }
 
 async function deleteTrack(id) {
