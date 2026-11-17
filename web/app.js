@@ -190,7 +190,7 @@ let youtubeHasSearched = false;
 let linkConfirmId = "";
 const downloading = new Set();
 
-const SW_BUILD = "36";
+const SW_BUILD = "37";
 
 const MARQUEE_PAUSE_S = 3;
 const MARQUEE_HOLD_END_S = 3;
@@ -635,6 +635,11 @@ function renderSongs() {
   updateNowArtwork();
   refreshPlayFavouritesButton();
   if (current) refreshSeek();
+  const songListHint = document.getElementById("song-list-hint");
+  if (songListHint) {
+    const n = state.tracks.length;
+    songListHint.textContent = n === 1 ? "1 Song" : n + " Songs";
+  }
 }
 
 function updateNowArtwork() {
@@ -1126,7 +1131,7 @@ function renderSearchResults() {
     playAll.type = "button";
     playAll.className = "play-all";
     playAll.dataset.playAll = name;
-    playAll.textContent = "Play all " + name;
+    playAll.textContent = "Play all";
     row.append(toggle, playAll);
     list.append(row);
     if (!open) continue;
@@ -1437,7 +1442,7 @@ function renderArtists() {
     playAll.type = "button";
     playAll.className = "play-all";
     playAll.dataset.playAll = group.name;
-    playAll.textContent = "Play all " + group.name;
+    playAll.textContent = "Play all";
     row.append(toggle, playAll);
     list.append(row);
     if (!open) continue;
