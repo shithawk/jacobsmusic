@@ -15,7 +15,7 @@
   );
   --song-box-ring: var(--accent);
   --song-box-ring-width: 2px;
-  --transport-bar: calc(114px + env(safe-area-inset-bottom));
+  --transport-bar: calc(132px + env(safe-area-inset-bottom));
   --top-nav-offset: calc(76px + env(safe-area-inset-top));
   --nav-gap: 4px;
   --nav-cream: #fff;
@@ -105,7 +105,7 @@ body {
 }
 
 body.has-now {
-  --now-bar-space: 168px;
+  --now-bar-space: 84px;
   --transport-space: calc(var(--transport-bar) + var(--now-bar-space));
 }
 
@@ -984,13 +984,19 @@ html[data-family-theme="steff"] #manage-sheet .sheet-body > h1 {
 }
 
 #artists-sheet .artist-row + .artist-row,
-#artists-sheet .artist-songs + .artist-row {
-  margin-top: 28px;
+#artists-sheet .artist-songs + .artist-row,
+#song-list .song + .song,
+#video-list .song + .song,
+#search-results > .song + .song {
+  margin-top: 16px;
 }
 
 html.iphone #artists-sheet .artist-row + .artist-row,
-html.iphone #artists-sheet .artist-songs + .artist-row {
-  margin-top: 22px;
+html.iphone #artists-sheet .artist-songs + .artist-row,
+html.iphone #song-list .song + .song,
+html.iphone #video-list .song + .song,
+html.iphone #search-results > .song + .song {
+  margin-top: 12px;
 }
 
 #artists-sheet .artist-songs {
@@ -1487,18 +1493,18 @@ html:not([data-family-theme="zero"]) .transport #play-button {
   padding: 10px 6px 12px;
 }
 
-html:not([data-family-theme="zero"]) .transport #shuffle {
-  width: 4.6rem;
-  max-width: 4.6rem;
-  min-height: 62px;
-  padding: 2px 4px 4px;
+html:not([data-family-theme="zero"]):not(.iphone) .transport #shuffle {
+  width: 86%;
+  max-width: none;
+  min-height: 84px;
+  padding: 6px 4px 10px;
   justify-self: center;
   align-self: center;
 }
 
-html:not([data-family-theme="zero"]) .transport #shuffle svg {
-  width: 28px;
-  height: 28px;
+html:not([data-family-theme="zero"]):not(.iphone) .transport #shuffle svg {
+  width: 32px;
+  height: 32px;
   transform: none;
 }
 

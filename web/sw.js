@@ -1,13 +1,13 @@
-const CACHE = "jacob-shell-v145";
+const CACHE = "jacob-shell-v161";
 const SHELL = [
   "/",
   "/index.html",
   "/styles.css",
-  "/styles.css?v=196",
+  "/styles.css?v=202",
   "/themes.css",
-  "/themes.css?v=162",
+  "/themes.css?v=171",
   "/app.js",
-  "/app.js?v=121",
+  "/app.js?v=122",
   "/heroes/jori.jpg",
   "/heroes/joriBW.jpg",
   "/heroes/wayne.jpeg",
@@ -53,10 +53,9 @@ function refreshShell(request) {
   const timer = setTimeout(() => controller.abort(), 4000);
   return fetch(new Request(request, { cache: "no-cache" }), { signal: controller.signal })
     .then((response) => {
-      if (response && response.ok) {
-        const copy = response.clone();
-        caches.open(CACHE).then((cache) => cache.put(request, copy)).catch(() => {});
-      }
+      if (!response || !response.ok) return null;
+      const copy = response.clone();
+      caches.open(CACHE).then((cache) => cache.put(request, copy)).catch(() => {});
       return response;
     })
     .catch(() => null)
@@ -100,25 +99,11 @@ self.addEventListener("fetch", (event) => {
   }
 
   const request = event.request;
-  const networkFirst =
-    request.mode === "navigate" ||
-    url.pathname === "/" ||
-    url.pathname === "/index.html" ||
-    url.pathname === "/styles.css" ||
-    url.pathname === "/themes.css" ||
-    url.pathname === "/app.js" ||
-    url.pathname === "/manifest.webmanifest";
   event.respondWith((async () => {
-    if (networkFirst) {
-      const fresh = await refreshShell(request);
-      if (fresh) return fresh;
-    }
     const cached = await cachedShell(request);
     if (cached) return cached;
-    if (!networkFirst) {
-      const fresh = await refreshShell(request);
-      if (fresh) return fresh;
-    }
+    const fresh = await refreshShell(request);
+    if (fresh) return fresh;
     if (request.mode === "navigate") {
       return (await caches.match("/index.html")) || (await caches.match("/")) || offlineResponse();
     }

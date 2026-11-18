@@ -244,14 +244,14 @@ html[data-family-theme="zero"] {
     0 0 12px color-mix(in srgb, var(--zero-outline) 55%, transparent),
     0 0 28px color-mix(in srgb, var(--zero-outline) 32%, transparent),
     0 0 44px color-mix(in srgb, var(--zero-outline) 16%, transparent);
-  --zero-trans-gap: 52px;
+  --zero-trans-gap: 28px;
   --zero-trans-pad: 14px;
-  --zero-btn-side: 62px;
-  --zero-btn-shuffle: 46px;
-  --zero-btn-play: 90px;
+  --zero-btn-side: 56px;
+  --zero-btn-shuffle: 44px;
+  --zero-btn-play: 78px;
   --zero-side-lift: 8px;
   --zero-row-nudge: 12px;
-  --transport-bar: calc(104px + env(safe-area-inset-bottom));
+  --transport-bar: calc(96px + env(safe-area-inset-bottom));
   --nav-cream: #fff;
   --nav-glass-current-text: #f2f5fa;
   --nav-glass-current-shadow: 0 1px 2px rgba(0, 0, 0, 0.45), 0 0 10px color-mix(in srgb, var(--nav-glass) 28%, transparent);
@@ -262,66 +262,48 @@ html[data-family-theme="zero"] .top-nav {
 }
 
 html[data-family-theme="zero"] .top-nav-row > .home:not(.search-clear) {
+  color: #f2f5fa;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.28) 0%,
+      rgba(255, 255, 255, 0.08) 16%,
+      rgba(255, 255, 255, 0) 42%
+    ),
+    linear-gradient(
+      165deg,
+      #3a3a40 0%,
+      #2c2c30 46%,
+      #242428 100%
+    );
+  -webkit-backdrop-filter: blur(16px) saturate(1.45);
+  backdrop-filter: blur(16px) saturate(1.45);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.65);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.62),
-    inset 0 -1px 0 color-mix(in srgb, var(--nav-glass) 32%, transparent),
-    inset 0 0 0 1px color-mix(in srgb, var(--nav-glass) 55%, #fff 25%),
-    0 0 28px color-mix(in srgb, var(--nav-glass) 62%, transparent),
-    0 0 52px color-mix(in srgb, var(--nav-glass) 44%, transparent),
-    0 0 88px color-mix(in srgb, var(--nav-glass) 28%, transparent),
-    0 0 128px color-mix(in srgb, var(--nav-glass) 14%, transparent),
-    0 6px 16px rgba(0, 0, 0, 0.42);
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.16),
+    0 0 14px color-mix(in srgb, var(--nav-glass) 26%, transparent),
+    0 6px 14px rgba(0, 0, 0, 0.5);
 }
 
 html[data-family-theme="zero"] .top-nav-row > .home.is-current:not(.search-clear) {
-  color: var(--nav-glass-current-text);
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.41) 0%,
-      color-mix(in srgb, var(--nav-glass) 22%, transparent) 17%,
-      rgba(255, 255, 255, 0.03) 43%
-    ),
-    linear-gradient(
-      165deg,
-      color-mix(in srgb, var(--nav-glass) 63%, color-mix(in srgb, #fff 35%, #0c0c14 65%) 37%) 0%,
-      color-mix(in srgb, var(--nav-glass) 47%, color-mix(in srgb, #c8d0ea 50%, #12121c 50%) 53%) 39%,
-      color-mix(in srgb, var(--nav-glass) 21%, color-mix(in srgb, #252530 45%, var(--bg) 55%) 79%) 100%
-    );
-  text-shadow: var(--nav-glass-current-shadow);
+  color: #101018;
+  background: #ececec;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  text-shadow: none;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.62),
-    inset 0 -1px 0 color-mix(in srgb, var(--nav-glass) 33%, transparent),
-    inset 0 0 0 1px color-mix(in srgb, var(--nav-glass) 58%, color-mix(in srgb, #fff 42%, #1a1a22 58%) 42%),
-    0 0 34px color-mix(in srgb, var(--nav-glass) 82%, #fff 4%),
-    0 0 61px color-mix(in srgb, var(--nav-glass) 59%, transparent),
-    0 0 100px color-mix(in srgb, var(--nav-glass) 38%, transparent),
-    0 0 144px color-mix(in srgb, var(--nav-glass) 20%, transparent),
-    0 8px 18px rgba(0, 0, 0, 0.52);
+    inset 0 0 0 1px color-mix(in srgb, var(--nav-glass) 28%, #fff 72%),
+    0 0 10px rgba(255, 255, 255, 0.45),
+    0 0 18px color-mix(in srgb, var(--nav-glass) 42%, transparent);
 }
 
 html[data-family-theme="zero"].iphone .top-nav-row > .home.is-current:not(.search-clear) {
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.38) 0%,
-      color-mix(in srgb, var(--nav-glass) 19%, transparent) 15%,
-      rgba(255, 255, 255, 0.02) 41%
-    ),
-    linear-gradient(
-      165deg,
-      color-mix(in srgb, var(--nav-glass) 60%, color-mix(in srgb, #fff 38%, #0c0c14 62%) 40%) 0%,
-      color-mix(in srgb, var(--nav-glass) 43%, color-mix(in srgb, #c8d0ea 50%, #12121c 50%) 57%) 41%,
-      color-mix(in srgb, var(--nav-glass) 20%, color-mix(in srgb, #252530 42%, var(--bg) 58%) 80%) 100%
-    );
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.57),
-    inset 0 -1px 0 color-mix(in srgb, var(--nav-glass) 28%, transparent),
-    inset 0 0 0 1px color-mix(in srgb, var(--nav-glass) 54%, color-mix(in srgb, #fff 40%, #1a1a22 60%) 46%),
-    0 0 15px color-mix(in srgb, var(--nav-glass) 65%, #fff 4%),
-    0 0 27px color-mix(in srgb, var(--nav-glass) 43%, transparent),
-    0 0 43px color-mix(in srgb, var(--nav-glass) 24%, transparent),
-    0 4px 12px rgba(0, 0, 0, 0.49);
+    inset 0 0 0 1px color-mix(in srgb, var(--nav-glass) 24%, #fff 76%),
+    0 0 8px rgba(255, 255, 255, 0.4),
+    0 0 14px color-mix(in srgb, var(--nav-glass) 36%, transparent);
 }
 
 html[data-family-theme="zero"] body.section-artists,
@@ -490,8 +472,8 @@ html[data-family-theme="zero"] .transport .big > span {
 }
 
 html[data-family-theme="zero"] .transport .big svg {
-  width: 34px;
-  height: 34px;
+  width: 30px;
+  height: 30px;
   filter: none;
 }
 
@@ -516,10 +498,14 @@ html[data-family-theme="zero"] .transport #shuffle {
 }
 
 html[data-family-theme="zero"] .transport #shuffle svg {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   transform: none;
   display: block;
+}
+
+html[data-family-theme="zero"] .transport #shuffle.is-on svg {
+  filter: none;
 }
 
 html[data-family-theme="zero"] .transport #play-button {
@@ -536,8 +522,8 @@ html[data-family-theme="zero"] .transport #play-button {
 }
 
 html[data-family-theme="zero"] .transport #play-button svg {
-  width: 46px;
-  height: 46px;
+  width: 40px;
+  height: 40px;
 }
 
 html[data-family-theme="zero"] .transport #play-button:not(.is-playing) {
@@ -604,12 +590,12 @@ html[data-family-theme="zero"] .transport #play-button.is-playing:active:not(:di
 }
 
 html.iphone[data-family-theme="zero"] {
-  --transport-bar: calc(82px + env(safe-area-inset-bottom));
+  --transport-bar: calc(90px + env(safe-area-inset-bottom));
   --zero-trans-gap: 14px;
   --zero-trans-pad: 10px;
-  --zero-btn-side: 42px;
-  --zero-btn-shuffle: 32px;
-  --zero-btn-play: 62px;
+  --zero-btn-side: 48px;
+  --zero-btn-shuffle: 38px;
+  --zero-btn-play: 70px;
   --zero-side-lift: 6px;
 }
 
@@ -639,46 +625,46 @@ html.iphone[data-family-theme="zero"] .transport .big {
 }
 
 html.iphone[data-family-theme="zero"] .transport .big svg {
-  width: 22px;
-  height: 22px;
+  width: 26px;
+  height: 26px;
 }
 
 html.iphone[data-family-theme="zero"] .transport #shuffle svg {
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
 }
 
 html.iphone[data-family-theme="zero"] .transport #play-button .icon-play,
 html.iphone[data-family-theme="zero"] .transport #play-button .icon-pause {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
 }
 
 @media (max-width: 540px) and (pointer: coarse) {
   html[data-family-theme="zero"]:not(.ipad) {
-    --transport-bar: calc(82px + env(safe-area-inset-bottom));
+    --transport-bar: calc(90px + env(safe-area-inset-bottom));
     --zero-trans-gap: 14px;
     --zero-trans-pad: 10px;
-    --zero-btn-side: 42px;
-    --zero-btn-shuffle: 32px;
-    --zero-btn-play: 62px;
+    --zero-btn-side: 48px;
+    --zero-btn-shuffle: 38px;
+    --zero-btn-play: 70px;
     --zero-side-lift: 6px;
   }
 
   html[data-family-theme="zero"]:not(.ipad) .transport .big svg {
-    width: 22px;
-    height: 22px;
+    width: 26px;
+    height: 26px;
   }
 
   html[data-family-theme="zero"]:not(.ipad) .transport #shuffle svg {
-    width: 16px;
-    height: 16px;
+    width: 20px;
+    height: 20px;
   }
 
   html[data-family-theme="zero"]:not(.ipad) .transport #play-button .icon-play,
   html[data-family-theme="zero"]:not(.ipad) .transport #play-button .icon-pause {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
   }
 
   html[data-family-theme="zero"]:not(.ipad) .transport {
@@ -889,7 +875,7 @@ body.section-home #finder {
 
 .theme-chip[data-theme="wayne"] {
   background: #c4a41c;
-  color: #db141a;
+  color: #fff;
 }
 
 .theme-chip[data-theme="jori"] {
