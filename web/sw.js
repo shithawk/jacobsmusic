@@ -1,13 +1,13 @@
-const CACHE = "jacob-shell-v125";
+const CACHE = "jacob-shell-v134";
 const SHELL = [
   "/",
   "/index.html",
   "/styles.css",
-  "/styles.css?v=188",
+  "/styles.css?v=190",
   "/themes.css",
-  "/themes.css?v=152",
+  "/themes.css?v=157",
   "/app.js",
-  "/app.js?v=117",
+  "/app.js?v=119",
   "/heroes/jori.jpg",
   "/heroes/joriBW.jpg",
   "/heroes/wayne.jpeg",
