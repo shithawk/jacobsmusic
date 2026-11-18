@@ -22,7 +22,7 @@ src = Path(sys.argv[1])
 dest = Path(sys.argv[2])
 fetch_oembed = sys.argv[3] not in {"0", "false", "False", "no"}
 
-def youtube_id_from_text(line: str) -> str | None:
+def youtube_id_from_text(line: str):
     raw = line.strip()
     if not raw:
         return None
@@ -51,7 +51,7 @@ def youtube_id_from_text(line: str) -> str | None:
                 return sanitize_id(parts[idx + 1])
     return None
 
-def sanitize_id(raw: str) -> str | None:
+def sanitize_id(raw: str):
     raw = (raw or "").strip()
     if re.fullmatch(r"[A-Za-z0-9_-]{6,20}", raw):
         return raw
