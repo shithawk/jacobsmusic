@@ -5,6 +5,10 @@ html {
   --nav-glass-text: #f5f9ff;
   --nav-glass-current-text: #fff;
   --nav-glass-current-shadow: 0 1px 2px rgba(0, 8, 24, 0.45);
+  --shuffle-on-surface: var(--accent);
+  --shuffle-on-lit: color-mix(in srgb, var(--accent) 74%, #fff);
+  --play-surface: var(--accent);
+  --play-lit: color-mix(in srgb, var(--accent) 74%, #fff);
 }
 html[data-family-theme="jori"] {
   --bg: #121a32;
@@ -137,6 +141,12 @@ html[data-family-theme="dan"] {
   --notice-surface: color-mix(in srgb, var(--bg) 82%, var(--accent) 18%);
   --accent: #f0b429;
   --accent-alt: #4f9599;
+  --dan-shuffle: #7e2a16;
+  --dan-shuffle-lit: color-mix(in srgb, var(--dan-shuffle) 72%, var(--accent-alt) 28%);
+  --shuffle-on-surface: var(--dan-shuffle);
+  --shuffle-on-lit: var(--dan-shuffle-lit);
+  --play-surface: var(--dan-shuffle);
+  --play-lit: var(--dan-shuffle-lit);
   --accent-orange: #ff8800;
   --text: #f0eef8;
   --nav-glass: #4f9599;
@@ -216,12 +226,13 @@ html[data-family-theme="zero"] {
   --zero-trans-gap: 52px;
   --zero-trans-pad: 14px;
   --zero-btn-side: 62px;
+  --zero-btn-shuffle: 46px;
   --zero-btn-play: 90px;
   --zero-side-lift: 8px;
   --transport-bar: calc(104px + env(safe-area-inset-bottom));
   --nav-cream: #fff;
-  --nav-glass-current-text: #e4e8f4;
-  --nav-glass-current-shadow: 0 1px 2px rgba(0, 0, 0, 0.55), 0 0 8px color-mix(in srgb, var(--nav-glass) 22%, transparent);
+  --nav-glass-current-text: #f2f5fa;
+  --nav-glass-current-shadow: 0 1px 2px rgba(0, 0, 0, 0.45), 0 0 10px color-mix(in srgb, var(--nav-glass) 28%, transparent);
 }
 
 html[data-family-theme="zero"] .top-nav {
@@ -245,50 +256,50 @@ html[data-family-theme="zero"] .top-nav-row > .home.is-current:not(.search-clear
   background:
     linear-gradient(
       180deg,
-      rgba(255, 255, 255, 0.2) 0%,
-      color-mix(in srgb, var(--nav-glass) 16%, transparent) 18%,
-      rgba(255, 255, 255, 0) 44%
+      rgba(255, 255, 255, 0.41) 0%,
+      color-mix(in srgb, var(--nav-glass) 22%, transparent) 17%,
+      rgba(255, 255, 255, 0.03) 43%
     ),
     linear-gradient(
       165deg,
-      color-mix(in srgb, var(--nav-glass) 48%, #0c0c14 52%) 0%,
-      color-mix(in srgb, var(--nav-glass) 36%, #12121c 64%) 40%,
-      color-mix(in srgb, var(--bg) 62%, #000 38%) 100%
+      color-mix(in srgb, var(--nav-glass) 63%, color-mix(in srgb, #fff 35%, #0c0c14 65%) 37%) 0%,
+      color-mix(in srgb, var(--nav-glass) 47%, color-mix(in srgb, #c8d0ea 50%, #12121c 50%) 53%) 39%,
+      color-mix(in srgb, var(--nav-glass) 21%, color-mix(in srgb, #252530 45%, var(--bg) 55%) 79%) 100%
     );
   text-shadow: var(--nav-glass-current-shadow);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.36),
-    inset 0 -1px 0 color-mix(in srgb, var(--nav-glass) 28%, transparent),
-    inset 0 0 0 1px color-mix(in srgb, var(--nav-glass) 62%, #1a1a22 38%),
-    0 0 32px color-mix(in srgb, var(--nav-glass) 72%, transparent),
-    0 0 58px color-mix(in srgb, var(--nav-glass) 48%, transparent),
-    0 0 96px color-mix(in srgb, var(--nav-glass) 30%, transparent),
-    0 0 140px color-mix(in srgb, var(--nav-glass) 16%, transparent),
-    0 8px 18px rgba(0, 0, 0, 0.55);
+    inset 0 1px 0 rgba(255, 255, 255, 0.62),
+    inset 0 -1px 0 color-mix(in srgb, var(--nav-glass) 33%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--nav-glass) 58%, color-mix(in srgb, #fff 42%, #1a1a22 58%) 42%),
+    0 0 34px color-mix(in srgb, var(--nav-glass) 82%, #fff 4%),
+    0 0 61px color-mix(in srgb, var(--nav-glass) 59%, transparent),
+    0 0 100px color-mix(in srgb, var(--nav-glass) 38%, transparent),
+    0 0 144px color-mix(in srgb, var(--nav-glass) 20%, transparent),
+    0 8px 18px rgba(0, 0, 0, 0.52);
 }
 
 html[data-family-theme="zero"].iphone .top-nav-row > .home.is-current:not(.search-clear) {
   background:
     linear-gradient(
       180deg,
-      rgba(255, 255, 255, 0.18) 0%,
-      color-mix(in srgb, var(--nav-glass) 14%, transparent) 16%,
-      rgba(255, 255, 255, 0) 40%
+      rgba(255, 255, 255, 0.38) 0%,
+      color-mix(in srgb, var(--nav-glass) 19%, transparent) 15%,
+      rgba(255, 255, 255, 0.02) 41%
     ),
     linear-gradient(
       165deg,
-      color-mix(in srgb, var(--nav-glass) 46%, #0c0c14 54%) 0%,
-      color-mix(in srgb, var(--nav-glass) 34%, #12121c 66%) 42%,
-      color-mix(in srgb, var(--bg) 60%, #000 40%) 100%
+      color-mix(in srgb, var(--nav-glass) 60%, color-mix(in srgb, #fff 38%, #0c0c14 62%) 40%) 0%,
+      color-mix(in srgb, var(--nav-glass) 43%, color-mix(in srgb, #c8d0ea 50%, #12121c 50%) 57%) 41%,
+      color-mix(in srgb, var(--nav-glass) 20%, color-mix(in srgb, #252530 42%, var(--bg) 58%) 80%) 100%
     );
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.32),
-    inset 0 -1px 0 color-mix(in srgb, var(--nav-glass) 24%, transparent),
-    inset 0 0 0 1px color-mix(in srgb, var(--nav-glass) 58%, #1a1a22 42%),
-    0 0 14px color-mix(in srgb, var(--nav-glass) 58%, transparent),
-    0 0 26px color-mix(in srgb, var(--nav-glass) 38%, transparent),
-    0 0 42px color-mix(in srgb, var(--nav-glass) 22%, transparent),
-    0 4px 12px rgba(0, 0, 0, 0.5);
+    inset 0 1px 0 rgba(255, 255, 255, 0.57),
+    inset 0 -1px 0 color-mix(in srgb, var(--nav-glass) 28%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--nav-glass) 54%, color-mix(in srgb, #fff 40%, #1a1a22 60%) 46%),
+    0 0 15px color-mix(in srgb, var(--nav-glass) 65%, #fff 4%),
+    0 0 27px color-mix(in srgb, var(--nav-glass) 43%, transparent),
+    0 0 43px color-mix(in srgb, var(--nav-glass) 24%, transparent),
+    0 4px 12px rgba(0, 0, 0, 0.49);
 }
 
 html[data-family-theme="zero"] body.section-artists,
@@ -393,11 +404,21 @@ html[data-family-theme="zero"] .transport {
   display: flex;
   flex-direction: row;
   align-items: flex-end;
-  justify-content: center;
+  justify-content: flex-start;
   gap: var(--zero-trans-gap);
   width: 100%;
+  box-sizing: border-box;
+  overflow: visible;
   min-height: calc(var(--zero-btn-play) + var(--zero-trans-pad) + 2px + env(safe-area-inset-bottom));
-  padding: 2px 12px calc(var(--zero-trans-pad) + env(safe-area-inset-bottom));
+  padding:
+    2px
+    max(14px, calc(env(safe-area-inset-right, 0px) + 12px))
+    calc(var(--zero-trans-pad) + env(safe-area-inset-bottom))
+    max(
+      6px,
+      env(safe-area-inset-left, 0px),
+      calc(50% - var(--zero-btn-side) - var(--zero-trans-gap) - (var(--zero-btn-play) / 2))
+    );
   background: var(--bg);
   box-shadow: none;
 }
@@ -454,6 +475,25 @@ html[data-family-theme="zero"] .transport .big.prominent {
   box-shadow: var(--zero-trans-blue-glow);
 }
 
+html[data-family-theme="zero"] .transport #shuffle {
+  width: var(--zero-btn-shuffle);
+  height: var(--zero-btn-shuffle);
+  min-width: var(--zero-btn-shuffle);
+  max-width: var(--zero-btn-shuffle);
+  max-height: var(--zero-btn-shuffle);
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: calc(var(--zero-side-lift) + (var(--zero-btn-side) - var(--zero-btn-shuffle)) / 2 + 6px);
+  align-self: flex-end;
+}
+
+html[data-family-theme="zero"] .transport #shuffle svg {
+  width: 24px;
+  height: 24px;
+  transform: none;
+  display: block;
+}
+
 html[data-family-theme="zero"] .transport #play-button {
   position: relative;
   left: auto;
@@ -464,6 +504,7 @@ html[data-family-theme="zero"] .transport #play-button {
   min-width: var(--zero-btn-play);
   max-width: var(--zero-btn-play);
   max-height: var(--zero-btn-play);
+  margin-bottom: 0;
 }
 
 html[data-family-theme="zero"] .transport #play-button svg {
@@ -539,6 +580,7 @@ html.iphone[data-family-theme="zero"] {
   --zero-trans-gap: 14px;
   --zero-trans-pad: 10px;
   --zero-btn-side: 42px;
+  --zero-btn-shuffle: 32px;
   --zero-btn-play: 62px;
   --zero-side-lift: 6px;
 }
@@ -548,8 +590,12 @@ html.iphone[data-family-theme="zero"] .now-stack {
 }
 
 html.iphone[data-family-theme="zero"] .transport {
-  padding-left: 0;
-  padding-right: 0;
+  padding-left: max(
+    4px,
+    env(safe-area-inset-left, 0px),
+    calc(50% - var(--zero-btn-side) - var(--zero-trans-gap) - (var(--zero-btn-play) / 2))
+  );
+  padding-right: max(20px, calc(env(safe-area-inset-right, 0px) + 14px));
 }
 
 html.iphone[data-family-theme="zero"] .transport .big {
@@ -569,6 +615,11 @@ html.iphone[data-family-theme="zero"] .transport .big svg {
   height: 22px;
 }
 
+html.iphone[data-family-theme="zero"] .transport #shuffle svg {
+  width: 16px;
+  height: 16px;
+}
+
 html.iphone[data-family-theme="zero"] .transport #play-button .icon-play,
 html.iphone[data-family-theme="zero"] .transport #play-button .icon-pause {
   width: 32px;
@@ -581,6 +632,7 @@ html.iphone[data-family-theme="zero"] .transport #play-button .icon-pause {
     --zero-trans-gap: 14px;
     --zero-trans-pad: 10px;
     --zero-btn-side: 42px;
+    --zero-btn-shuffle: 32px;
     --zero-btn-play: 62px;
     --zero-side-lift: 6px;
   }
@@ -590,12 +642,25 @@ html.iphone[data-family-theme="zero"] .transport #play-button .icon-pause {
     height: 22px;
   }
 
+  html[data-family-theme="zero"]:not(.ipad) .transport #shuffle svg {
+    width: 16px;
+    height: 16px;
+  }
+
   html[data-family-theme="zero"]:not(.ipad) .transport #play-button .icon-play,
   html[data-family-theme="zero"]:not(.ipad) .transport #play-button .icon-pause {
     width: 32px;
     height: 32px;
   }
 
+  html[data-family-theme="zero"]:not(.ipad) .transport {
+    padding-left: max(
+      4px,
+      env(safe-area-inset-left, 0px),
+      calc(50% - var(--zero-btn-side) - var(--zero-trans-gap) - (var(--zero-btn-play) / 2))
+    );
+    padding-right: max(20px, calc(env(safe-area-inset-right, 0px) + 14px));
+  }
 }
 
 html.iphone[data-family-theme="zero"] .transport .big:active:not(:disabled) {
@@ -656,33 +721,38 @@ html[data-family-theme="dan"] .now-stripe {
   );
 }
 
-html[data-family-theme="dan"] .transport #shuffle.is-on {
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, #7E2A16 74%, #fff) 0%,
-    #7E2A16 44%,
-    color-mix(in srgb, #7E2A16 56%, #000) 72%,
-    color-mix(in srgb, #7E2A16 30%, #000) 100%
-  );
+html[data-family-theme="dan"] .transport #shuffle.plain,
+html[data-family-theme="dan"] .transport #shuffle:not(.is-on) {
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.32),
-    inset 0 -5px 8px rgba(0, 0, 0, 0.32),
-    0 0 12px color-mix(in srgb, var(--accent) 88%, transparent),
-    0 0 24px color-mix(in srgb, var(--accent) 62%, transparent),
-    0 0 40px color-mix(in srgb, var(--accent) 38%, transparent),
-    0 5px 0 rgba(0, 0, 0, 0.46),
-    0 8px 16px rgba(0, 0, 0, 0.52);
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -5px 8px rgba(0, 0, 0, 0.38),
+    0 5px 0 rgba(0, 0, 0, 0.48),
+    0 9px 16px rgba(0, 0, 0, 0.55);
 }
 
-html.iphone[data-family-theme="dan"] .transport #shuffle.is-on {
+html[data-family-theme="dan"] .transport #shuffle.plain:active:not(:disabled),
+html[data-family-theme="dan"] .transport #shuffle:not(.is-on):active:not(:disabled) {
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.26),
-    inset 0 -4px 6px rgba(0, 0, 0, 0.28),
-    0 0 10px color-mix(in srgb, var(--accent) 82%, transparent),
-    0 0 20px color-mix(in srgb, var(--accent) 55%, transparent),
-    0 0 32px color-mix(in srgb, var(--accent) 32%, transparent),
-    0 4px 0 rgba(0, 0, 0, 0.4),
-    0 6px 12px rgba(0, 0, 0, 0.46);
+    inset 0 2px 6px rgba(0, 0, 0, 0.35),
+    0 1px 0 rgba(0, 0, 0, 0.35),
+    0 3px 8px rgba(0, 0, 0, 0.4);
+}
+
+html.iphone[data-family-theme="dan"] .transport #shuffle.plain,
+html.iphone[data-family-theme="dan"] .transport #shuffle:not(.is-on) {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -4px 6px rgba(0, 0, 0, 0.34),
+    0 4px 0 rgba(0, 0, 0, 0.42),
+    0 6px 12px rgba(0, 0, 0, 0.48);
+}
+
+html.iphone[data-family-theme="dan"] .transport #shuffle.plain:active:not(:disabled),
+html.iphone[data-family-theme="dan"] .transport #shuffle:not(.is-on):active:not(:disabled) {
+  box-shadow:
+    inset 0 2px 5px rgba(0, 0, 0, 0.34),
+    0 1px 0 rgba(0, 0, 0, 0.32),
+    0 2px 6px rgba(0, 0, 0, 0.38);
 }
 
 .theme-picker-wrap {

@@ -22,6 +22,7 @@ fi
 DNS="$(tailscale status --json 2>/dev/null | python3 -c 'import json,sys; print(json.load(sys.stdin)["Self"]["DNSName"].rstrip("."))' 2>/dev/null || true)"
 if [[ -n "$DNS" ]]; then
   URL="https://${DNS}:8443/"
+  bash "$ROOT/scripts/ensure-qrcode.sh"
   python3 - "$URL" "$QR" <<'PY'
 import sys
 from pathlib import Path

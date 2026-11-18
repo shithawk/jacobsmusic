@@ -27,6 +27,7 @@ fi
 
 URL="https://${IP}:${PORT}/?guest=1"
 
+bash "$ROOT/scripts/ensure-qrcode.sh"
 python3 - "$URL" "$QR" <<'PY'
 import sys
 from pathlib import Path
