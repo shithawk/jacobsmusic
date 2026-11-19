@@ -4018,7 +4018,7 @@ const liquidBlob = {
     ctx.globalAlpha = 0.5;
     ctx.fillStyle = "#f7f3ea";
     const s = size * 0.16;
-    const x = cx + direction * size * 0.42;
+    const x = cx + direction * size * 0.36;
     const y = cy;
     ctx.beginPath();
     if (direction > 0) {
