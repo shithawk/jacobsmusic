@@ -2606,7 +2606,7 @@ html.iphone[data-family-theme="liquid"] {
 
 html[data-family-theme="liquid"] body.has-now,
 html.iphone[data-family-theme="liquid"] body.has-now {
-  --now-bar-space: 57px;
+  --now-bar-space: 42px;
 }
 
 html[data-family-theme="liquid"] .now-stack,
@@ -2729,7 +2729,27 @@ html[data-family-theme="liquid"] #add-music {
 }
 
 html[data-family-theme="liquid"] .home-library-signs {
-  padding-bottom: 8px;
+  padding-bottom: 56px;
+}
+
+html[data-family-theme="liquid"] #song-list,
+html[data-family-theme="liquid"] .sheet-body,
+html[data-family-theme="liquid"] #videos-sheet .sheet-body,
+html[data-family-theme="liquid"] #videos-sheet #video-list {
+  padding-bottom: 0;
+}
+
+html[data-family-theme="liquid"] .sheet {
+  padding-bottom: 0;
+}
+
+html[data-family-theme="liquid"] #artists-sheet .sheet-body {
+  display: flex;
+  flex-direction: column;
+}
+
+html[data-family-theme="liquid"] body.songs-page .finder {
+  padding-bottom: 0;
 }
 
 html[data-family-theme="liquid"] body.section-home .home-actions {
