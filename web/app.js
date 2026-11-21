@@ -32,6 +32,7 @@ const state = {
   openSearchArtists: new Set(),
   artistQueue: null,
   catalogSessionDownloads: new Set(),
+  addedLinkIds: [],
   videosInline: false,
   videosScrollToTop: false
 };
@@ -1204,6 +1205,18 @@ function bindEvents() {
     const entry = state.catalog.find((item) => item.file === button.dataset.download);
     if (entry) downloadEntry(entry, true);
   });
+  document.getElementById("added-links").addEventListener("click", (event) => {
+    const fav = event.target.closest("[data-favorite]");
+    if (fav) {
+      event.preventDefault();
+      event.stopPropagation();
+      toggleFavorite(fav.dataset.favorite);
+      return;
+    }
+    const row = event.target.closest(".song[data-play]");
+    if (!row) return;
+    playListed(row.dataset.play, { stay: true });
+  });
   document.getElementById("manage-list").addEventListener("click", (event) => {
     const button = event.target.closest("[data-remove]");
     if (!button) return;
@@ -1261,6 +1274,7 @@ function render() {
   renderCatalog();
   renderArtists();
   renderVideos();
+  renderAddedLinks();
 }
 
 function libraryArtistCount() {
@@ -1885,7 +1899,8 @@ function playListed(id, options) {
   const track = state.tracks.find((item) => item.id === id);
   if (!track) return;
   const keepQueue = Boolean(options && options.keepQueue);
-  const videosInline = isVideoTrack(track) && !keepQueue;
+  const stay = Boolean(options && options.stay);
+  const videosInline = isVideoTrack(track) && !keepQueue && !stay;
   if (!keepQueue) state.artistQueue = null;
   if (track.source !== "local") hideSheet("artists-sheet");
   if (videosInline) {
@@ -1902,7 +1917,7 @@ function playListed(id, options) {
     state.videosInline = false;
     if (track.source !== "local") hideSheet("videos-sheet");
   }
-  if (!keepQueue && track.id === state.currentId && isAudiblyPlaying()) {
+  if (!keepQueue && !stay && track.id === state.currentId && isAudiblyPlaying()) {
     if (videosInline) {
       state.videosScrollToTop = true;
       renderVideos();
@@ -1912,7 +1927,7 @@ function playListed(id, options) {
     if (track.source !== "local") openPlayer();
     return;
   }
-  userPlay(track, !videosInline && track.source !== "local");
+  userPlay(track, !videosInline && track.source !== "local" && !stay);
   if (videosInline) scrollSheetBodyToTop("videos-sheet");
 }
 
@@ -3111,11 +3126,14 @@ function setAddError(text) {
 async function openAdd() {
   setAddError("");
   hideConfirm();
+  hideLinkConfirm();
   state.catalogSessionDownloads.clear();
+  state.addedLinkIds = [];
   showSheet("add-sheet");
   scrollSheetBodyToTop("add-sheet");
   await loadCatalog();
   renderCatalog({ resetScroll: true, onlyPending: true });
+  renderAddedLinks();
 }
 
 async function loadCatalog() {
@@ -3435,8 +3453,25 @@ function hideLinkConfirm() {
 function playConfirmedLink() {
   const id = linkConfirmId;
   hideLinkConfirm();
-  hideSheet("add-sheet");
-  if (id) playListed(id);
+  if (id) playListed(id, { stay: true });
+}
+
+function rememberAddedLink(track) {
+  if (!track || !track.id) return;
+  state.addedLinkIds = [track.id].concat(state.addedLinkIds.filter((id) => id !== track.id));
+}
+
+function renderAddedLinks() {
+  const list = document.getElementById("added-links");
+  if (!list) return;
+  list.replaceChildren();
+  const tracks = [];
+  for (const id of state.addedLinkIds) {
+    const track = state.tracks.find((item) => item.id === id);
+    if (track) tracks.push(track);
+  }
+  list.hidden = tracks.length === 0;
+  for (const track of tracks) list.append(songBox(track));
 }
 
 function addTypedLink() {
@@ -3448,20 +3483,30 @@ async function addLinkText(text) {
   state.working = true;
   document.getElementById("add-link").disabled = true;
   document.getElementById("add-link").textContent = "Adding…";
-  showLinkConfirm("Adding…");
+  hideLinkConfirm();
   try {
     const track = await addLink(text, {
-      onStatus: (message) => showLinkConfirm(message)
+      onStatus: (message) => {
+        const button = document.getElementById("add-link");
+        if (button) button.textContent = message || "Adding…";
+      }
     });
     document.getElementById("link-input").value = "";
-    hideLinkConfirm();
-    hideSheet("add-sheet");
+    rememberAddedLink(track);
     render();
-    setNotice("Added " + track.title);
   } catch (error) {
-    const message = error.message || "That link could not be added.";
-    if (linkConfirmVisible()) showLinkConfirm(message);
-    else setAddError(message);
+    const parsed = parseLink(text);
+    const existing = parsed
+      ? state.tracks.find((track) => linkRefsMatch(track, parsed))
+      : null;
+    if (existing) {
+      document.getElementById("link-input").value = "";
+      rememberAddedLink(existing);
+      render();
+      setAddError(error.message || "That song is already in the list.");
+    } else {
+      setAddError(error.message || "That link could not be added.");
+    }
   } finally {
     state.working = false;
     document.getElementById("add-link").textContent = "Add";
@@ -4791,9 +4836,11 @@ function syncYouTubeFullscreenButton() {
   const ytStage = document.getElementById("stage-yt");
   if (!button) return;
   const show = Boolean(currentTrack() && isSource("youtube"));
-  button.hidden = !show;
   const on = youtubeIsFullscreen();
-  const label = on ? "Exit full screen" : "Full screen";
+  // X handles exit — hide the text control while fullscreen so it isn't
+  // an "Exit full screen / go back" instruction under the video.
+  button.hidden = !show || on;
+  const label = "Full screen";
   const labelEl = button.querySelector(".yt-fullscreen-label");
   if (labelEl) labelEl.textContent = label;
   else button.textContent = label;

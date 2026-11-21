@@ -1,9 +1,21 @@
 [
   {
+    "source": "soundcloud",
+    "title": "A Mere",
+    "artist": "The Sea And Cake",
+    "url": "https://soundcloud.com/arlobanks/the-sea-and-cake-a-mere"
+  },
+  {
     "videoId": "Fr_-tXJfSww",
     "title": "All Full Albums",
     "artist": "Boards Of Canada",
     "url": "https://www.youtube.com/watch?v=Fr_-tXJfSww"
+  },
+  {
+    "source": "soundcloud",
+    "title": "All The Photos",
+    "artist": "The Sea And Cake",
+    "url": "https://soundcloud.com/gaga-digi/the-sea-and-cake-all-the-photos"
   },
   {
     "videoId": "JHul8vzXsV8",
@@ -12,10 +24,28 @@
     "url": "https://www.youtube.com/watch?v=JHul8vzXsV8"
   },
   {
+    "source": "soundcloud",
+    "title": "Any Day",
+    "artist": "The Sea And Cake",
+    "url": "https://soundcloud.com/newmusic2023/the-sea-and-cake-any-day"
+  },
+  {
     "videoId": "p_tcyQbfRo8",
     "title": "Concerning the UFO sighting near Highland, Illinois",
     "artist": "Sufjan Stevens",
     "url": "https://www.youtube.com/watch?v=p_tcyQbfRo8"
+  },
+  {
+    "source": "soundcloud",
+    "title": "Inn Keeping",
+    "artist": "The Sea And Cake",
+    "url": "https://soundcloud.com/skatehard233/the-sea-and-cake-inn-keeping"
+  },
+  {
+    "source": "soundcloud",
+    "title": "New Schools",
+    "artist": "The Sea And Cake",
+    "url": "https://soundcloud.com/briefpastiche/the-sea-and-cake-new-schools"
   },
   {
     "source": "soundcloud",
@@ -28,5 +58,11 @@
     "title": "To Be Alone With You",
     "artist": "Sufjan Stevens",
     "url": "https://www.youtube.com/watch?v=N3zu9NucyBg"
+  },
+  {
+    "source": "soundcloud",
+    "title": "Weekend",
+    "artist": "The Sea And Cake",
+    "url": "https://soundcloud.com/wantanear/the-sea-and-cake-weekend"
   }
 ]
