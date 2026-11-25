@@ -1,13 +1,13 @@
-const CACHE = "jacob-shell-v320";
+const CACHE = "jacob-shell-v359";
 const SHELL = [
   "/",
   "/index.html",
   "/styles.css",
-  "/styles.css?v=296",
+  "/styles.css?v=319",
   "/themes.css",
   "/themes.css?v=185",
   "/app.js",
-  "/app.js?v=227",
+  "/app.js?v=255",
   "/heroes/jacobLiquid.jpg",
   "/heroes/jori.jpg",
   "/heroes/joriBW.jpg",
@@ -100,7 +100,24 @@ self.addEventListener("fetch", (event) => {
   }
 
   const request = event.request;
+  // Versioned CSS/JS: prefer network so phone PWAs pick up layout fixes.
+  const networkFirst =
+    url.pathname === "/styles.css" ||
+    url.pathname === "/themes.css" ||
+    url.pathname === "/app.js" ||
+    url.pathname === "/index.html" ||
+    url.pathname === "/";
   event.respondWith((async () => {
+    if (networkFirst) {
+      const fresh = await refreshShell(request);
+      if (fresh) return fresh;
+      const cached = await cachedShell(request);
+      if (cached) return cached;
+      if (request.mode === "navigate") {
+        return (await caches.match("/index.html")) || (await caches.match("/")) || offlineResponse();
+      }
+      return offlineResponse();
+    }
     const cached = await cachedShell(request);
     if (cached) return cached;
     const fresh = await refreshShell(request);

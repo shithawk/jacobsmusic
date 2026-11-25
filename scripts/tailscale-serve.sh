@@ -1,13 +1,15 @@
 #!/bin/bash
 # Expose Jacob's Music on Tailscale (tailnet only).
-#   Jacob's → https://<machine>.<tailnet>.ts.net:8443/ or :8444/  (Caddy :8092)
+#   Jacob's → https://<machine>.<tailnet>.ts.net:8444/  (Caddy :8092)
+#   :8443 is reserved for Wayne (serve) / Steff (funnel) — do not bind it here.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 QR="$ROOT/images/jacobsmusic-tailscale-qr.png"
 
-echo "Tailscale Serve: Jacob's on :8092 (HTTPS :8443 and :8444)"
-tailscale serve --bg --https=8443 "http://127.0.0.1:8092"
+echo "Tailscale Serve: Jacob's on :8092 (HTTPS :8444 only)"
+# Drop any leftover Jacob binding on :8443 so Wayne/Steff can use it.
+tailscale serve --https=8443 off >/dev/null 2>&1 || true
 tailscale serve --bg --https=8444 "http://127.0.0.1:8092"
 tailscale serve status
 
@@ -21,7 +23,7 @@ fi
 
 DNS="$(tailscale status --json 2>/dev/null | python3 -c 'import json,sys; print(json.load(sys.stdin)["Self"]["DNSName"].rstrip("."))' 2>/dev/null || true)"
 if [[ -n "$DNS" ]]; then
-  URL="https://${DNS}:8443/"
+  URL="https://${DNS}:8444/"
   bash "$ROOT/scripts/ensure-qrcode.sh"
   python3 - "$URL" "$QR" <<'PY'
 import sys

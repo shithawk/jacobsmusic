@@ -13,7 +13,10 @@ bash "$ROOT/scripts/make-catalog.sh"
 echo "2/4 Rebuild YouTube catalog…"
 bash "$ROOT/scripts/make-youtube-catalog.sh"
 
-echo "3/4 Local Caddy (:8092)…"
+echo "3/5 Suggest API (:8096)…"
+bash "$ROOT/scripts/ensure-suggest-api.sh" || echo "  (suggestions unavailable until LASTFM_API_KEY / SOUNDCLOUD_CLIENT_ID are set)"
+
+echo "4/5 Local Caddy (:8092)…"
 if ! curl -sf --max-time 3 "http://127.0.0.1:8092/" >/dev/null; then
   mkdir -p "$ROOT/caddy-data"
   if [[ -f "$ROOT/caddy-data/caddy.pid" ]]; then
@@ -28,10 +31,15 @@ if ! curl -sf --max-time 3 "http://127.0.0.1:8092/" >/dev/null; then
     echo "Caddy failed to start. See $ROOT/caddy-data/caddy.log" >&2
     exit 1
   fi
+else
+  # Reload routes (suggest proxy) when Caddy is already up.
+  if command -v caddy >/dev/null 2>&1; then
+    caddy reload --config "$ROOT/Caddyfile" 2>/dev/null || true
+  fi
 fi
 echo "  OK http://127.0.0.1:8092/"
 
-echo "4/4 Tailscale Serve (:8443 + :8444 → :8092)…"
+echo "5/5 Tailscale Serve (:8444 → :8092; :8443 left for Wayne/Steff)…"
 bash "$ROOT/scripts/tailscale-serve.sh"
 
 MP3_COUNT="$(python3 -c "import json; print(len(json.load(open('$ROOT/music/catalog.json'))))" 2>/dev/null || echo "?")"
@@ -46,7 +54,7 @@ echo "Catalog: ${MP3_COUNT} songs on Mac (~${MB} MB), ${YT_COUNT} YouTube entrie
 echo ""
 if [[ -n "$DNS" ]]; then
   echo "Tailscale (Android / phone with Tailscale on, same account):"
-  echo "  https://${DNS}:8443/  (or :8444/)"
+  echo "  https://${DNS}:8444/"
   echo "  QR:  $ROOT/images/jacobsmusic-tailscale-qr.png"
   echo ""
   echo "  Chrome → open URL → ⋮ → Install app (or Update if already installed)."

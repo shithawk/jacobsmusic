@@ -26,7 +26,7 @@ Or only Tailscale:
 ./scripts/tailscale-serve.sh
 ```
 
-Site URL: `https://<your-machine>.<tailnet>.ts.net:8443/` (or `:8444/`) — Chrome → **Install app** (or open once to pull a service-worker update).
+Site URL: `https://<your-machine>.<tailnet>.ts.net:8444/` — Chrome → **Install app** (or open once to pull a service-worker update). (`:8443` is reserved for Wayne/Steff.)
 
 ## Guest install (same Wi‑Fi, no Tailscale)
 
