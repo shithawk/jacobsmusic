@@ -180,7 +180,7 @@ let youtubeHasSearched = false;
 let linkConfirmId = "";
 const downloading = new Set();
 
-const SW_BUILD = "72";
+const SW_BUILD = "20261126suggest";
 
 const MARQUEE_PAUSE_S = 3;
 const MARQUEE_HOLD_END_S = 3;
@@ -1587,9 +1587,8 @@ async function resolveSoundCloudArtURL(track) {
   const pageURL = soundCloudPageURL(track);
   if (pageURL) {
     try {
-      const response = await fetch("/api/soundcloud-oembed?url=" + encodeURIComponent(pageURL));
-      if (response.ok) {
-        const payload = await response.json();
+      const payload = await fetchOEmbedJson("soundcloud", pageURL);
+      if (payload) {
         const art = soundCloudArtURL(payload.thumbnail_url);
         if (art) {
           track.artworkUrl = art;
@@ -2429,8 +2428,8 @@ async function vetSuggestion(raw) {
 }
 
 
-const LASTFM_API_KEY = "";
-const SOUNDCLOUD_CLIENT_ID_DEFAULT = "";
+const LASTFM_API_KEY = "610c2796b01798f25a533a07da64aba0";
+const SOUNDCLOUD_CLIENT_ID_DEFAULT = "Hpp4j7peQTPimFlKMjTX3y3mK2946b7y";
 const SC_CLIENT_ID_STORAGE = "sc-client-id-v1";
 
 function soundCloudClientId() {
@@ -2488,10 +2487,10 @@ async function soundcloudSearchTrack(artist) {
   const scQuery = "/search/tracks?" + params.toString();
   const direct = "https://api-v2.soundcloud.com" + scQuery;
   const paths = [
-    "/api/soundcloud-v2" + scQuery,
-    // Phone internet — works when Mac/Caddy proxy is down (PWA shell may still be cached).
-    "https://api.allorigins.win/raw?url=" + encodeURIComponent(direct),
-    direct
+    // Phone internet first — works with Mac/Caddy off.
+    allOriginsProxy(direct),
+    direct,
+    "/api/soundcloud-v2" + scQuery
   ];
   let payload = null;
   for (const url of paths) {
@@ -2606,7 +2605,7 @@ async function refreshArtistSuggestions(options) {
   const status = document.getElementById("artist-suggestions-status");
   const list = document.getElementById("artist-suggest-list");
   if (!status || !list) return;
-  const token = ++suggestLoadToken;
+  // Cache hit must not bump suggestLoadToken — that was cancelling in-flight Refresh.
   if (!force) {
     const cached = readSuggestCache();
     if (cached && cached.length) {
@@ -2615,71 +2614,84 @@ async function refreshArtistSuggestions(options) {
       return;
     }
   }
-  const seeds = await suggestionSeeds();
-  if (token !== suggestLoadToken) return;
-  if (!seeds.length) {
-    renderArtistSuggestions([]);
-    setArtistSuggestionsStatus("Play and heart songs to get ideas.");
-    return;
-  }
-  setArtistSuggestionsStatus("Finding artists…", { busy: true });
-  renderArtistSuggestions([]);
-  const exclude = [...libraryArtistNameSet()];
-  if (force) {
-    try {
-      const prev = JSON.parse(localStorage.getItem(SUGGEST_CACHE_KEY) || "null");
-      for (const item of (prev && prev.items) || []) {
+  const token = ++suggestLoadToken;
+  const previous = readSuggestCache() || [];
+  try {
+    const seeds = await suggestionSeeds();
+    if (token !== suggestLoadToken) return;
+    if (!seeds.length) {
+      renderArtistSuggestions([]);
+      setArtistSuggestionsStatus("Play and heart songs to get ideas.");
+      return;
+    }
+    // Keep current rows visible while loading so Refresh never blanks the section.
+    setArtistSuggestionsStatus("Finding artists…", { busy: true });
+    const exclude = [...libraryArtistNameSet()];
+    if (force) {
+      for (const item of previous) {
         const name = String((item && item.artist) || "").trim();
         if (name) exclude.push(name);
       }
-    } catch { /* ignore */ }
-  }
-  let rawItems = [];
-  try {
-    rawItems = await buildClientSuggestions(seeds, exclude, 5);
-  } catch {
-    rawItems = [];
-  }
-  if (token !== suggestLoadToken) return;
-  if (!rawItems.length) {
-    const stale = (() => {
-      try {
-        const raw = localStorage.getItem(SUGGEST_CACHE_KEY);
-        if (!raw) return null;
-        const payload = JSON.parse(raw);
-        return payload && Array.isArray(payload.items) ? payload.items : null;
-      } catch {
-        return null;
+    }
+    let rawItems = [];
+    try {
+      rawItems = await buildClientSuggestions(seeds, exclude, 5);
+    } catch {
+      rawItems = [];
+    }
+    if (token !== suggestLoadToken) return;
+    if (!rawItems.length) {
+      if (previous.length) {
+        renderArtistSuggestions(previous);
+        setArtistSuggestionsStatus(
+          force
+            ? "No new picks right now — still showing previous."
+            : "Showing saved suggestions — refresh when online.",
+          { refresh: true }
+        );
+        return;
       }
-    })();
-    if (stale && stale.length) {
-      renderArtistSuggestions(stale);
-      setArtistSuggestionsStatus("Showing saved suggestions — refresh when online.");
+      renderArtistSuggestions([]);
+      setArtistSuggestionsStatus("No suggestions right now. Try again after more plays.");
       return;
     }
-    renderArtistSuggestions([]);
-    setArtistSuggestionsStatus("No suggestions right now. Try again after more plays.");
-    return;
-  }
-  const vetted = [];
-  for (const raw of rawItems) {
-    if (vetted.length >= 5) break;
-    try {
-      const ok = await vetSuggestion(raw);
-      if (!ok) continue;
-      if (vetted.some((row) => row.artist.toLocaleLowerCase() === ok.artist.toLocaleLowerCase())) continue;
-      vetted.push(ok);
-    } catch {
-      /* skip bad candidate */
+    const vetted = [];
+    for (const raw of rawItems) {
+      if (vetted.length >= 5) break;
+      try {
+        const ok = await vetSuggestion(raw);
+        if (!ok) continue;
+        if (vetted.some((row) => row.artist.toLocaleLowerCase() === ok.artist.toLocaleLowerCase())) continue;
+        vetted.push(ok);
+      } catch {
+        /* skip bad candidate */
+      }
     }
-  }
-  if (token !== suggestLoadToken) return;
-  writeSuggestCache(vetted);
-  renderArtistSuggestions(vetted);
-  if (!vetted.length) {
-    setArtistSuggestionsStatus("No new SoundCloud picks right now. Try again after more plays.");
-  } else {
-    setArtistSuggestionsStatus("", { refresh: true });
+    if (token !== suggestLoadToken) {
+      // Persist successful fetch even if a newer load superseded this one.
+      if (vetted.length) writeSuggestCache(vetted);
+      return;
+    }
+    if (vetted.length) {
+      writeSuggestCache(vetted);
+      renderArtistSuggestions(vetted);
+      setArtistSuggestionsStatus("", { refresh: true });
+      return;
+    }
+    // Never write an empty cache over good suggestions — that made Refresh look broken
+    // until the user left Artists and came back (which rebuilt from scratch).
+    if (previous.length) {
+      renderArtistSuggestions(previous);
+      setArtistSuggestionsStatus("No new picks right now — still showing previous.", { refresh: true });
+    } else {
+      renderArtistSuggestions([]);
+      setArtistSuggestionsStatus("No new SoundCloud picks right now. Try again after more plays.");
+    }
+  } finally {
+    if (token === suggestLoadToken) {
+      const refreshBtn = document.getElementById("artist-suggestions-refresh");
+      if (refreshBtn) refreshBtn.disabled = false;
+    }
   }
 }
 
@@ -3426,11 +3438,8 @@ async function ensureSoundCloudStageArt(track, artEl, widget) {
   const pageURL = soundCloudPageURL(track);
   if (pageURL) {
     try {
-      const response = await fetch("/api/soundcloud-oembed?url=" + encodeURIComponent(pageURL));
-      if (response.ok) {
-        const payload = await response.json();
-        if (applySoundCloudStageArt(track, artEl, payload.thumbnail_url)) return;
-      }
+      const payload = await fetchOEmbedJson("soundcloud", pageURL);
+      if (payload && applySoundCloudStageArt(track, artEl, payload.thumbnail_url)) return;
     } catch {
       /* try widget next */
     }
@@ -3957,6 +3966,167 @@ function goHome() {
   document.getElementById("songs").scrollTop = 0;
   syncNavCurrent();
   renderSongs();
+}
+
+function usbSheetIsOpen() {
+  const sheet = document.getElementById("usb-sheet");
+  return Boolean(sheet && !sheet.hidden);
+}
+
+function syncUsbEntryVisibility() {
+  const sign = document.getElementById("home-sign-usb");
+  if (!sign) return;
+  const show = isAndroidPhone();
+  sign.hidden = !show;
+  if (!show) return;
+  const n = state.usbTracks.length;
+  const label = n ? (n === 1 ? "1 USB song" : n + " USB songs") : "USB";
+  const hint = document.getElementById("home-usb-hint");
+  if (hint) hint.textContent = label;
+  else sign.textContent = label;
+  sign.setAttribute("aria-label", n ? "USB · " + label : "Play from USB");
+}
+
+function openUsb() {
+  if (!isAndroidPhone()) return;
+  hideSheet("add-sheet");
+  hideSheet("manage-sheet");
+  hideSheet("artists-sheet");
+  hideSheet("videos-sheet");
+  hideConfirm();
+  closePlayer();
+  document.body.classList.remove("songs-page");
+  document.body.classList.remove("search-page");
+  showSheet("usb-sheet");
+  renderUsb();
+  scrollSheetBodyToTop("usb-sheet");
+}
+
+function clearUsbSession(options) {
+  const silent = Boolean(options && options.silent);
+  const playingUsb = currentTrack() && currentTrack().source === "usb";
+  if (playingUsb) {
+    try {
+      audio().pause();
+      otherAudio().pause();
+    } catch { /* ignore */ }
+    setPlaying(false);
+    state.currentId = null;
+  }
+  if (state.artistQueue && state.artistQueue.usb) state.artistQueue = null;
+  for (const track of state.usbTracks) {
+    fileBlobs.delete(track.id);
+    const url = fileURLs.get(track.id);
+    if (url) {
+      try {
+        URL.revokeObjectURL(url);
+      } catch { /* ignore */ }
+      fileURLs.delete(track.id);
+    }
+  }
+  state.usbTracks = [];
+  const folder = document.getElementById("usb-folder-input");
+  const files = document.getElementById("usb-files-input");
+  if (folder) folder.value = "";
+  if (files) files.value = "";
+  renderUsb();
+  renderSongs();
+  syncUsbEntryVisibility();
+  if (!silent) setNotice("USB cleared");
+}
+
+async function ingestUsbFiles(fileList) {
+  const picked = Array.from(fileList || []).filter(isUsbAudioFile);
+  const folder = document.getElementById("usb-folder-input");
+  const files = document.getElementById("usb-files-input");
+  if (folder) folder.value = "";
+  if (files) files.value = "";
+  if (!picked.length) {
+    setNotice("No playable audio in that selection.");
+    renderUsb();
+    return;
+  }
+  // Replace session — still no IndexedDB writes.
+  clearUsbSession({ silent: true });
+  const tracks = [];
+  for (const file of picked) {
+    let tags = { title: "", artist: "" };
+    try {
+      tags = await readAudioTags(file);
+    } catch {
+      tags = { title: "", artist: "" };
+    }
+    const fallback = file.name.replace(/\.[^.]+$/, "") || "Song";
+    const track = {
+      id: uid(),
+      title: tags.title || fallback,
+      artist: tags.artist || "",
+      source: "usb",
+      mediaRef: file.name,
+      bytes: file.size,
+      createdAt: Date.now()
+    };
+    fileBlobs.set(track.id, file);
+    prepareURL(track.id, file);
+    tracks.push(track);
+  }
+  tracks.sort((a, b) =>
+    (a.artist || "").localeCompare(b.artist || "", undefined, { sensitivity: "base", numeric: true }) ||
+    (a.title || "").localeCompare(b.title || "", undefined, { sensitivity: "base", numeric: true })
+  );
+  state.usbTracks = tracks;
+  renderUsb();
+  syncUsbEntryVisibility();
+  setNotice(tracks.length === 1 ? "1 USB song ready" : tracks.length + " USB songs ready");
+}
+
+function playUsbListed(id) {
+  const track = state.usbTracks.find((item) => item.id === id);
+  if (!track) return;
+  let ids = state.usbTracks.map((item) => item.id);
+  if (state.shuffle) ids = shuffleIds(ids.slice());
+  const index = Math.max(0, ids.indexOf(id));
+  state.artistQueue = { name: "USB", ids, index, usb: true };
+  userPlay(track, false);
+}
+
+function renderUsb() {
+  const sheet = document.getElementById("usb-sheet");
+  if (!sheet || sheet.hidden) {
+    syncUsbEntryVisibility();
+    return;
+  }
+  const empty = document.getElementById("usb-empty");
+  const status = document.getElementById("usb-status");
+  const clearBtn = document.getElementById("usb-clear");
+  const list = document.getElementById("usb-list");
+  const n = state.usbTracks.length;
+  if (empty) empty.hidden = n > 0;
+  if (clearBtn) clearBtn.hidden = n === 0;
+  if (status) {
+    status.hidden = n === 0;
+    status.textContent =
+      n === 0
+        ? ""
+        : n === 1
+          ? "1 song from USB (not saved on phone)"
+          : n + " songs from USB (not saved on phone)";
+  }
+  if (!list) return;
+  const scroller = sheet.querySelector(".sheet-body");
+  const scrollTop = scroller ? scroller.scrollTop : 0;
+  list.replaceChildren();
+  if (n) {
+    const playAll = document.createElement("button");
+    playAll.type = "button";
+    playAll.className = "play-all";
+    playAll.id = "usb-play-all";
+    playAll.textContent = "Play all";
+    list.append(playAll);
+  }
+  for (const track of state.usbTracks) list.append(songBox(track));
+  if (scroller) scroller.scrollTop = scrollTop;
+  syncUsbEntryVisibility();
 }
 
 function syncNavCurrent() {
@@ -4625,33 +4795,47 @@ async function resolveSoundCloudPlayURL(track) {
   return streamRef;
 }
 
-async function fetchOEmbed(parsed) {
-  const fallback = parsed.source === "youtube" ? "YouTube video" : "SoundCloud song";
-  const urls = [];
-  if (parsed.source === "soundcloud") {
-    urls.push("https://soundcloud.com/oembed?format=json&url=" + encodeURIComponent(parsed.pageURL));
-    urls.push("/api/soundcloud-oembed?url=" + encodeURIComponent(parsed.pageURL));
-  } else {
-    urls.push("/api/youtube-oembed?url=" + encodeURIComponent(parsed.pageURL));
+
+function allOriginsProxy(url) {
+  return "https://api.allorigins.win/raw?url=" + encodeURIComponent(url);
+}
+
+function oembedEndpoints(source, pageURL) {
+  const encoded = encodeURIComponent(pageURL);
+  if (source === "soundcloud") {
+    const direct = "https://soundcloud.com/oembed?format=json&url=" + encoded;
+    return [direct, allOriginsProxy(direct), "/api/soundcloud-oembed?url=" + encoded];
   }
-  for (const endpoint of urls) {
+  const direct = "https://www.youtube.com/oembed?format=json&url=" + encoded;
+  return [direct, allOriginsProxy(direct), "/api/youtube-oembed?url=" + encoded];
+}
+
+async function fetchOEmbedJson(source, pageURL) {
+  if (!pageURL) return null;
+  for (const endpoint of oembedEndpoints(source, pageURL)) {
     try {
       const response = await fetch(endpoint);
       if (!response.ok) continue;
-      const payload = await response.json();
-      const videoTitle = String(payload.title || "").trim();
-      const channel = String(payload.author_name || "").trim();
-      if (parsed.source === "youtube") {
-        return { ...youtubeNames(videoTitle, channel), streamRef: "", artworkUrl: "" };
-      }
-      const streamRef = soundCloudStreamRefFromOEmbed(payload);
-      const artworkUrl = soundCloudArtURL(payload.thumbnail_url);
-      return { title: videoTitle || fallback, artist: channel, streamRef: streamRef, artworkUrl: artworkUrl };
+      return await response.json();
     } catch {
       /* try next */
     }
   }
-  return { title: fallback, artist: "", streamRef: "", artworkUrl: "" };
+  return null;
+}
+
+async function fetchOEmbed(parsed) {
+  const fallback = parsed.source === "youtube" ? "YouTube video" : "SoundCloud song";
+  const payload = await fetchOEmbedJson(parsed.source, parsed.pageURL);
+  if (!payload) return { title: fallback, artist: "", streamRef: "", artworkUrl: "" };
+  const videoTitle = String(payload.title || "").trim();
+  const channel = String(payload.author_name || "").trim();
+  if (parsed.source === "youtube") {
+    return { ...youtubeNames(videoTitle, channel), streamRef: "", artworkUrl: "" };
+  }
+  const streamRef = soundCloudStreamRefFromOEmbed(payload);
+  const artworkUrl = soundCloudArtURL(payload.thumbnail_url);
+  return { title: videoTitle || fallback, artist: channel, streamRef: streamRef, artworkUrl: artworkUrl };
 }
 
 function youtubeNames(videoTitle, channel) {
