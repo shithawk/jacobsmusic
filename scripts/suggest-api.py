@@ -344,6 +344,9 @@ class Handler(BaseHTTPRequestHandler):
             self._send(404, {"error": "not found"})
             return
         length = int(self.headers.get("Content-Length") or 0)
+        if length < 0 or length > 65536:
+            self._send(413, {"error": "body too large"})
+            return
         raw = self.rfile.read(length) if length else b"{}"
         try:
             data = json.loads(raw.decode("utf-8") or "{}")
